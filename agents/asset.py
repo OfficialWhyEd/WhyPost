@@ -97,13 +97,23 @@ def process_video(video: dict, cfg: dict) -> dict:
     script = video.get("script", {})
     tts_text = build_tts_text(script)
 
+    # Pre-flight memory check
+    from agents.memory import check_before_action, remember_error, remember_success, init_learning_db
+    init_learning_db()
+    blocked, reason, lesson = check_before_action("ASSET", "tts", {"voice": voice, "lang": lang})
+    if blocked:
+        logger.error(f"[MEMORY BLOCK] TTS bloccato: {reason}")
+        return {"audio": None, "captions": None, "broll": [], "tts_text": tts_text}
+
     # TTS
     audio_path = vid_dir / "audio.mp3"
     tts_ok = asyncio.run(generate_tts(tts_text, voice, audio_path))
     if tts_ok:
         logger.info(f"TTS OK: {audio_path}")
+        remember_success("ASSET", "tts_fail")
     else:
         logger.error(f"TTS fallito per {vid_id}")
+        remember_error("ASSET", "tts_fail", f"edge-tts fallito (voice={voice})", "Aggiorna edge-tts: pip install --upgrade edge-tts")
 
     # Captions
     srt_path = vid_dir / "captions.srt"

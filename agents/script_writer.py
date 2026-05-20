@@ -61,22 +61,53 @@ def mark_idea_used(idea_id: int):
             (datetime.now().isoformat(), idea_id)
         )
 
+def build_memory_context(idea: dict) -> str:
+    """Inietta lezioni passate nel prompt — il sistema ricorda cosa ha imparato."""
+    try:
+        from agents.memory import get_lessons_for
+        lessons = get_lessons_for("SCRIPT", limit=8)
+        if not lessons:
+            return ""
+        lines = ["\n\n---\nMEMORIA SISTEMA (lezioni da video precedenti — rispettale):"]
+        for l in lessons:
+            prefix = {"success": "FUNZIONA BENE", "warning": "ATTENZIONE", "correction": "CORREZIONE UTENTE"}
+            lines.append(f"- [{prefix.get(l['type'], l['type'].upper())}] {l['text'][:120]}")
+        return "\n".join(lines)
+    except Exception:
+        return ""
+
 def write_script(idea: dict, language: str, video_type: str) -> dict | None:
+    from agents.memory import check_before_action, remember_error, remember_success, init_learning_db
+    init_learning_db()
+
+    # Pre-flight: blocco se errore noto
+    blocked, reason, lesson = check_before_action(
+        "SCRIPT", "write_script",
+        {"topic": idea.get("topic", ""), "idea": idea["title"][:50], "video_type": video_type}
+    )
+    if blocked:
+        logger.error(f"[MEMORY BLOCK] Script writing bloccato: {reason}\nLezione: {lesson}")
+        return None
+
     prompt_template = (BASE / "prompts" / "script_writer.md").read_text()
     prompt = prompt_template.replace("{IDEA}", idea["title"])
     prompt = prompt.replace("{LANGUAGE}", "italiano" if language == "it" else "english")
     prompt = prompt.replace("{VIDEO_TYPE}", video_type)
+    prompt += build_memory_context(idea)
 
     raw = ask_claude(prompt, model="sonnet")
     if not raw:
+        remember_error("SCRIPT", "claude_no_response", "Claude non ha risposto", "Verifica rate limit e connessione")
         return None
 
-    # Estrai JSON anche se Claude aggiunge testo prima/dopo
     try:
         start = raw.index("{")
         end = raw.rindex("}") + 1
-        return json.loads(raw[start:end])
+        result = json.loads(raw[start:end])
+        remember_success("SCRIPT", "claude_no_response")
+        return result
     except (ValueError, json.JSONDecodeError) as e:
+        remember_error("SCRIPT", "json_parse_fail", f"JSON non valido: {raw[:100]}", "Claude deve rispondere SOLO con JSON puro senza markdown")
         logger.error(f"JSON parse error: {e}\nRaw: {raw[:300]}")
         return None
 

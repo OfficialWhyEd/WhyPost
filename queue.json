@@ -1,3 +1,47 @@
 {
-  "videos": []
+  "videos": [
+    {
+      "id": "wp_20260521_010716_00",
+      "title": "AI Demolisce Congettura Matematica",
+      "status": "needs_fix",
+      "language": "it",
+      "video_type": "tech_news",
+      "platform": [
+        "instagram",
+        "tiktok"
+      ],
+      "script": {
+        "hook": "Un'AI ha appena demolito una congettura matematica che resisteva da decenni.",
+        "body": [
+          "Un modello di OpenAI ha confutato una congettura centrale nella geometria discreta.",
+          "La congettura riguardava come i punti si distribuiscono nello spazio in dimensioni alte.",
+          "Il modello non ha trovato la prova per caso: ha esplorato costruzioni che i matematici ignoravano.",
+          "I ricercatori hanno poi verificato e confermato il controesempio generato dall'AI.",
+          "È la prima volta che un sistema AI falsifica un risultato aperto in matematica pura."
+        ],
+        "cta": "Segui per altre news su AI e scienza.",
+        "caption": "Un modello OpenAI ha confutato una congettura in geometria discreta rimasta aperta per anni. L'AI non come strumento, ma come matematico. 🧮",
+        "hashtags": [
+          "#OpenAI",
+          "#Matematica",
+          "#AI",
+          "#Geometria",
+          "#ScienzaItalia"
+        ],
+        "title_card": "AI Demolisce Congettura Matematica",
+        "duration_estimate": 38
+      },
+      "idea_id": 1,
+      "idea_title": "An OpenAI model has disproved a central conjecture in discrete geometry",
+      "created_at": "2026-05-21T01:07:31.995596",
+      "scheduled_at": null,
+      "assets": {
+        "audio": null,
+        "captions": null,
+        "broll": [],
+        "tts_text": "Un'AI ha appena demolito una congettura matematica che resisteva da decenni. Un modello di OpenAI ha confutato una congettura centrale nella geometria discreta. La congettura riguardava come i punti si distribuiscono nello spazio in dimensioni alte. Il modello non ha trovato la prova per caso: ha esplorato costruzioni che i matematici ignoravano. I ricercatori hanno poi verificato e confermato il controesempio generato dall'AI. È la prima volta che un sistema AI falsifica un risultato aperto in matematica pura. Segui per altre news su AI e scienza"
+      },
+      "safety_fail_reason": "Audio TTS mancante"
+    }
+  ]
 }

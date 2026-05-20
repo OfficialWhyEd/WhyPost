@@ -90,10 +90,18 @@ class AppStore: ObservableObject {
 
     func sendToClaude(_ userInput: String) async -> String {
         let stateContext = "Sistema: \(systemStatus). Buffer: \(buffer.ready_videos)/\(buffer.target_days)gg. Video coda: \(queue.count)."
-        let prompt = "Sei l'AI di WhyPost Mission Control. \(stateContext)\nUtente: \(userInput)\nRispondi in modo conciso e operativo."
+        let prompt = """
+        Sei l'AI di WhyPost Mission Control. Hai memoria permanente: ogni correzione che l'utente ti dà viene salvata e applicata a tutti i video futuri.
+        \(stateContext)
+        Utente: \(userInput)
+        Rispondi in modo conciso e operativo. Se l'utente ti corregge, conferma che hai salvato la correzione.
+        """
 
         guard let url = URL(string: "\(baseURL)/claude"),
-              let body = try? JSONSerialization.data(withJSONObject: ["prompt": prompt])
+              let body = try? JSONSerialization.data(withJSONObject: [
+                  "prompt": prompt,
+                  "user_input": userInput  // passato separato per auto-detect correzioni
+              ])
         else { return "Errore: server Flask non raggiungibile su :5174" }
 
         var req = URLRequest(url: url)
@@ -108,5 +116,13 @@ class AppStore: ObservableObject {
         else { return "Claude non raggiungibile. Avvia il server: python server/app.py" }
 
         return response
+    }
+
+    func fetchMemorySummary() async -> [String: Any] {
+        guard let url = URL(string: "\(baseURL)/memory/summary"),
+              let (data, _) = try? await URLSession.shared.data(from: url),
+              let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any]
+        else { return [:] }
+        return json
     }
 }
