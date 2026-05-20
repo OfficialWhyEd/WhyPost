@@ -1,0 +1,8 @@
+# WhyPost crontab — install: crontab ~/Documents/WhyPost/crontab.txt
+0 6 * * *    cd ~/Documents/WhyPost && source venv/bin/activate && python -m agents.exel
+0 7 * * *    cd ~/Documents/WhyPost && source venv/bin/activate && python -m agents.main check_buffer
+30 7 * * *   cd ~/Documents/WhyPost && source venv/bin/activate && python -m agents.asset
+0 8 * * *    cd ~/Documents/WhyPost && source venv/bin/activate && python -m agents.clack render
+*/15 * * * * cd ~/Documents/WhyPost && source venv/bin/activate && python -m agents.publisher
+0 22 * * *   cd ~/Documents/WhyPost && source venv/bin/activate && python -m agents.telemetry
+0 9 * * 0    cd ~/Documents/WhyPost && source venv/bin/activate && python -m agents.opus

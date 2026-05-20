@@ -1,0 +1,20 @@
+{
+  "system": "idle",
+  "agents": {
+    "MAIN":      {"status": "idle", "last_run": null},
+    "EXEL":      {"status": "idle", "last_run": null, "ideas_count": 0},
+    "SCRIPT":    {"status": "idle", "last_run": null, "scripted_today": 0},
+    "ASSET":     {"status": "idle", "last_run": null},
+    "CLACK":     {"status": "idle", "last_run": null, "rendering": null},
+    "SAFETY":    {"status": "idle", "last_run": null},
+    "PUBLISHER": {"status": "idle", "last_run": null, "published_today": 0},
+    "TELEMETRY": {"status": "idle", "last_run": null},
+    "OPUS":      {"status": "idle", "last_run": null}
+  },
+  "buffer": {
+    "ready_videos": 0,
+    "target_days": 7,
+    "next_publish": null
+  },
+  "updated_at": null
+}
