@@ -1,0 +1,207 @@
+@import url('https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700;800;900&family=Geist+Mono:wght@400;500;600&display=swap');
+@import "tailwindcss";
+
+@font-face {
+  font-family: 'NeuePower';
+  src: url('/NeuePower-Ultra.ttf') format('truetype');
+  font-weight: 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* ── Design Tokens — Linear-grade dark surface system ─ */
+:root {
+  /* Canvas & Surface Ladder */
+  --bg:      #070709;
+  --surf-1:  #0f1011;
+  --surf-2:  #141516;
+  --surf-3:  #1c1d1f;
+
+  /* Borders — hairline only */
+  --border:    rgba(255,255,255,0.07);
+  --border-hi: rgba(255,255,255,0.12);
+
+  /* Legacy alias (keeps old refs working) */
+  --panel:    var(--surf-1);
+  --panel-hi: var(--surf-2);
+
+  /* Text — ink system */
+  --text:   #eff0f2;
+  --text-2: #9ca3af;
+  --text-3: #6b7280;
+
+  /* Inset highlight — theme-aware */
+  --inset-hi: rgba(255,255,255,0.05);
+
+  /* Semantic */
+  --accent:      oklch(73% 0.14 158);
+  --accent-dim:  oklch(73% 0.14 158 / 0.1);
+  --accent-text: oklch(22% 0.06 158);
+  --danger:      oklch(65% 0.19 24);
+  --warn:        oklch(73% 0.15 68);
+  --info:        oklch(68% 0.15 232);
+
+  /* Radius */
+  --r:    12px;
+  --r-sm: 8px;
+  --r-xs: 4px;
+}
+
+/* ── Reset ───────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Geist', system-ui, sans-serif;
+  font-size: 14px;
+  overflow: hidden;
+  height: 100dvh;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Ambient glow — top-left only */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background: radial-gradient(
+    ellipse 60% 50% at -5% -5%,
+    oklch(30% 0.1 158 / 0.12) 0%,
+    transparent 65%
+  );
+}
+
+#root {
+  position: relative;
+  z-index: 1;
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── Scrollbars ──────────────────────────────────── */
+::-webkit-scrollbar { width: 3px; background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+::-webkit-scrollbar-thumb:hover { background: var(--border-hi); }
+
+/* ── Panel — solid surface, Linear-style ─────────── */
+.panel {
+  background: var(--surf-1);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+}
+
+/* ── Panel-glass — floating layers only ──────────── */
+.panel-glass {
+  background: rgba(10, 10, 14, 0.88);
+  backdrop-filter: blur(40px) saturate(180%);
+  -webkit-backdrop-filter: blur(40px) saturate(180%);
+  border: 1px solid var(--border-hi);
+  border-radius: var(--r);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.07),
+    0 24px 80px rgba(0,0,0,0.6);
+}
+
+/* ── Type utilities ──────────────────────────────── */
+.mono { font-family: 'Geist Mono', monospace; }
+
+.label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1.4px;
+  text-transform: uppercase;
+  color: var(--text-2);
+}
+
+.eyebrow {
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.4px;
+  color: var(--text-2);
+}
+
+.section-title {
+  font-family: 'NeuePower', 'Geist', sans-serif;
+  font-size: 18px;
+  font-weight: 900;
+  color: var(--text);
+  letter-spacing: -0.4px;
+}
+
+/* ── Interactive surfaces ────────────────────────── */
+.surface-btn {
+  background: var(--surf-1);
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  transition: background 0.15s, border-color 0.15s;
+}
+.surface-btn:hover {
+  background: var(--surf-2);
+  border-color: var(--border-hi);
+}
+
+/* ── Calendar shimmer on empty slots ─────────────── */
+@property --shimmer-pos {
+  syntax: '<percentage>';
+  inherits: false;
+  initial-value: -60%;
+}
+
+.cal-empty {
+  --shimmer-pos: -60%;
+  background: linear-gradient(
+    90deg,
+    transparent var(--shimmer-pos),
+    rgba(255,255,255,0.025) calc(var(--shimmer-pos) + 50%),
+    transparent calc(var(--shimmer-pos) + 100%)
+  );
+  animation: shimmer 4s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+  0%   { --shimmer-pos: -60%; }
+  60%  { --shimmer-pos: 130%; }
+  100% { --shimmer-pos: 130%; }
+}
+
+/* ── Reduced motion ──────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .cal-empty { animation: none; }
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ── Light theme ─────────────────────────────────── */
+[data-theme="light"] {
+  --bg:        oklch(97% 0.004 160);
+  --surf-1:    oklch(99% 0.002 160);
+  --surf-2:    oklch(96% 0.005 160);
+  --surf-3:    oklch(93% 0.007 160);
+  --border:    rgba(0,0,0,0.07);
+  --border-hi: rgba(0,0,0,0.12);
+  --text:      oklch(12% 0.008 160);
+  --text-2:    oklch(38% 0.008 160);
+  --text-3:    oklch(52% 0.008 160);
+  --inset-hi:  rgba(0,0,0,0.04);
+  --accent:    oklch(38% 0.14 158);
+  --accent-dim: oklch(38% 0.14 158 / 0.1);
+  --danger:    oklch(48% 0.19 24);
+  --warn:      oklch(50% 0.15 68);
+}
+[data-theme="light"] body::before {
+  background: radial-gradient(
+    ellipse 60% 50% at -5% -5%,
+    oklch(75% 0.1 158 / 0.06) 0%,
+    transparent 65%
+  );
+}
+[data-theme="light"] ::-webkit-scrollbar-thumb {
+  background: rgba(0,0,0,0.12);
+}

@@ -1,6 +1,6 @@
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, send_file
 from pathlib import Path
-import json, yaml, subprocess, sys
+import json, yaml, subprocess, sys, glob
 
 BASE = Path(__file__).parent.parent
 sys.path.insert(0, str(BASE))
@@ -148,6 +148,94 @@ def video_outcome():
         return jsonify({"ok": True, "outcome_score": score})
     except Exception as e:
         return jsonify({"ok": False, "error": str(e)})
+
+# ── VIDEO PREVIEW ENDPOINTS ────────────────────────────────────────────────
+
+def find_video_in_queue(vid_id: str) -> dict | None:
+    q = read_json(BASE / "queue.json")
+    for v in q.get("videos", []):
+        if v.get("id") == vid_id:
+            return v
+    return None
+
+def save_queue(q: dict):
+    (BASE / "queue.json").write_text(json.dumps(q, indent=2, ensure_ascii=False))
+
+@app.route("/video/<vid_id>/detail")
+def video_detail(vid_id):
+    v = find_video_in_queue(vid_id)
+    if not v:
+        return jsonify({"error": "video not found"}), 404
+
+    # Try to attach render path if a .mp4 exists
+    renders_dir = BASE / "data" / "renders" / vid_id
+    render_path = None
+    if renders_dir.exists():
+        mp4s = list(renders_dir.glob("*.mp4"))
+        if mp4s:
+            render_path = str(mp4s[0])
+
+    result = dict(v)
+    result["render_path"] = render_path
+    return jsonify(result)
+
+@app.route("/video/<vid_id>/audio")
+def video_audio(vid_id):
+    audio = BASE / "data" / "assets" / vid_id / "audio.mp3"
+    if not audio.exists():
+        return jsonify({"error": "audio not found"}), 404
+    return send_file(str(audio), mimetype="audio/mpeg")
+
+@app.route("/video/<vid_id>/render")
+def video_render_file(vid_id):
+    renders_dir = BASE / "data" / "renders" / vid_id
+    mp4s = list(renders_dir.glob("*.mp4")) if renders_dir.exists() else []
+    if not mp4s:
+        return jsonify({"error": "render not found"}), 404
+    return send_file(str(mp4s[0]), mimetype="video/mp4")
+
+@app.route("/video/<vid_id>/approve", methods=["POST"])
+def video_approve(vid_id):
+    q = read_json(BASE / "queue.json")
+    changed = False
+    for v in q.get("videos", []):
+        if v.get("id") == vid_id:
+            v["status"] = "ready"
+            v["approved_at"] = __import__("datetime").datetime.now().isoformat()
+            data = request.json or {}
+            if data.get("note"):
+                v["note"] = data["note"]
+            changed = True
+    if not changed:
+        return jsonify({"ok": False, "error": "video not found"}), 404
+    save_queue(q)
+    return jsonify({"ok": True})
+
+@app.route("/video/<vid_id>/reject", methods=["POST"])
+def video_reject(vid_id):
+    q = read_json(BASE / "queue.json")
+    changed = False
+    for v in q.get("videos", []):
+        if v.get("id") == vid_id:
+            v["status"] = "needs_fix"
+            v["rejected_at"] = __import__("datetime").datetime.now().isoformat()
+            data = request.json or {}
+            if data.get("note"):
+                v["fix_note"] = data["note"]
+                # Save rejection as a correction in memory
+                try:
+                    from agents.memory import remember_correction, init_learning_db
+                    init_learning_db()
+                    remember_correction(data["note"], "ALL", {"source": "preview_reject", "video_id": vid_id})
+                except Exception:
+                    pass
+            changed = True
+    if not changed:
+        return jsonify({"ok": False, "error": "video not found"}), 404
+    save_queue(q)
+    return jsonify({"ok": True})
+
+# ── END VIDEO PREVIEW ────────────────────────────────────────────────────────
 
 if __name__ == "__main__":
     # Init learning DB all'avvio

@@ -1,48 +1,23 @@
-content:
-  topics: ["tech ai", "produttività dev", "automazione", "claude code tricks", "tool gratuiti"]
-  blacklist: ["politica", "religione", "NSFW"]
-  language: "it"  # "it" | "en" | "both"
-
-daily_topics:
-  monday:    null
-  tuesday:   null
-  wednesday: null
-  thursday:  null
-  friday:    null
-  saturday:  null
-  sunday:    null
-
-schedule:
-  monday:    [{type: "tech_news",  time: "09:00"}]
-  tuesday:   [{type: "tutorial",   time: "18:00"}]
-  wednesday: [{type: "tech_news",  time: "09:00"}]
-  thursday:  [{type: "tutorial",   time: "18:00"}]
-  friday:    [{type: "tech_news",  time: "09:00"}]
-  saturday:  [{type: "best_of",    time: "12:00"}]
-  sunday:    [{type: "best_of",    time: "12:00"}]
-
 buffer:
   target_days: 7
-  min_days: 3
-
+content:
+  blacklist:
+  - politica
+  - religione
+  - NSFW
+  topics:
+  - tech ai
+  - produttività dev
+  - automazione
+  - claude code
+  - tool gratuiti
 platforms:
-  instagram: {enabled: true,  order: 1}
-  tiktok:    {enabled: true,  order: 2}
-  youtube:   {enabled: false, order: 3}
-
-tts:
-  voice_it: "it-IT-IsabellaNeural"
-  voice_en: "en-US-JennyNeural"
-  speed: 1.0
-
-claude:
-  script_model:  "sonnet"
-  review_model:  "opus"
-  safety_model:  "sonnet"
-
-remotion:
-  fps: 30
-  width: 1080
-  height: 1920
-  duration_min: 25
-  duration_max: 60
+  instagram:
+    enabled: true
+    order: 1
+  tiktok:
+    enabled: false
+    order: 2
+  youtube:
+    enabled: false
+    order: 3
