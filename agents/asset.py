@@ -45,7 +45,7 @@ def build_tts_text(script: dict) -> str:
         parts.append(script["cta"])
     return ". ".join(p.strip().rstrip(".") for p in parts if p)
 
-def fetch_broll(query: str, count: int = 3) -> list:
+def fetch_broll(query: str, vid_dir: Path, count: int = 3) -> list:
     api_key = os.getenv("PEXELS_API_KEY", "")
     if not api_key:
         logger.warning("PEXELS_API_KEY non impostata — B-roll saltato")
@@ -62,7 +62,7 @@ def fetch_broll(query: str, count: int = 3) -> list:
             if not files:
                 continue
             video_url = files[0]["link"]
-            fname = ASSETS_DIR / f"broll_{v['id']}.mp4"
+            fname = vid_dir / f"broll_{v['id']}.mp4"
             if not fname.exists():
                 with requests.get(video_url, stream=True, timeout=60) as r:
                     fname.write_bytes(r.content)
@@ -127,7 +127,7 @@ def process_video(video: dict, cfg: dict) -> dict:
 
     # B-roll
     search_query = video.get("idea_title", script.get("title_card", "technology"))[:50]
-    broll = fetch_broll(search_query, count=3)
+    broll = fetch_broll(search_query, vid_dir, count=3)
 
     return {
         "audio": str(audio_path) if tts_ok else None,
@@ -160,7 +160,13 @@ def run():
     processed = 0
 
     for video in queue["videos"]:
-        if video.get("status") != "scripted":
+        # Processa "scripted" e "needs_fix" se l'audio è mancante
+        if video.get("status") == "needs_fix":
+            vid_dir = ASSETS_DIR / video["id"]
+            audio = vid_dir / "audio.mp3"
+            if audio.exists() and audio.stat().st_size > 1000:
+                continue  # audio già ok, salta
+        elif video.get("status") != "scripted":
             continue
         logger.info(f"Processing assets: {video['id']}")
         assets = process_video(video, cfg)
