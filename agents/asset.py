@@ -26,9 +26,14 @@ async def generate_tts(text: str, voice: str, output_path: Path) -> bool:
     try:
         communicate = edge_tts.Communicate(text, voice)
         await communicate.save(str(output_path))
+        if not output_path.exists() or output_path.stat().st_size < 1000:
+            logger.error(f"TTS ha prodotto file vuoto o troppo piccolo: {output_path}")
+            output_path.unlink(missing_ok=True)
+            return False
         return True
     except Exception as e:
         logger.error(f"TTS error: {e}")
+        output_path.unlink(missing_ok=True)
         return False
 
 def build_tts_text(script: dict) -> str:

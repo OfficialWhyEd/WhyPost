@@ -41,24 +41,29 @@ def extract_agent_from_text(text: str) -> str:
     return "ALL"
 
 
+@app.route("/api/state")
 @app.route("/state")
 def get_state():
     return jsonify(read_json(BASE / "state.json"))
 
+@app.route("/api/queue")
 @app.route("/queue")
 def get_queue():
     return jsonify(read_json(BASE / "queue.json"))
 
+@app.route("/api/config", methods=["GET"])
 @app.route("/config", methods=["GET"])
 def get_config():
     return jsonify(read_yaml(BASE / "config.yaml"))
 
+@app.route("/api/config", methods=["POST"])
 @app.route("/config", methods=["POST"])
 def set_config():
     data = request.json
     (BASE / "config.yaml").write_text(yaml.dump(data, allow_unicode=True))
     return jsonify({"ok": True})
 
+@app.route("/api/queue/add", methods=["POST"])
 @app.route("/queue/add", methods=["POST"])
 def add_to_queue():
     q = read_json(BASE / "queue.json")
@@ -66,6 +71,7 @@ def add_to_queue():
     (BASE / "queue.json").write_text(json.dumps(q, indent=2, ensure_ascii=False))
     return jsonify({"ok": True})
 
+@app.route("/api/memory/summary")
 @app.route("/memory/summary")
 def memory_summary():
     try:
@@ -75,6 +81,7 @@ def memory_summary():
     except Exception as e:
         return jsonify({"error": str(e)})
 
+@app.route("/api/memory/lessons")
 @app.route("/memory/lessons")
 def memory_lessons():
     agent = request.args.get("agent", "SCRIPT")
@@ -85,9 +92,9 @@ def memory_lessons():
     except Exception as e:
         return jsonify({"error": str(e)})
 
+@app.route("/api/memory/correct", methods=["POST"])
 @app.route("/memory/correct", methods=["POST"])
 def memory_correct():
-    """Endpoint per salvare correzioni manuali dalla CHAT-AI."""
     data = request.json
     text = data.get("text", "")
     agent = data.get("agent", "ALL")
@@ -101,6 +108,15 @@ def memory_correct():
     except Exception as e:
         return jsonify({"ok": False, "error": str(e)})
 
+@app.route("/api/run", methods=["POST"])
+def run_pipeline():
+    subprocess.Popen(
+        [sys.executable, str(BASE / "agents" / "main.py"), "check_buffer"],
+        cwd=str(BASE)
+    )
+    return jsonify({"ok": True, "message": "pipeline avviata"})
+
+@app.route("/api/claude", methods=["POST"])
 @app.route("/claude", methods=["POST"])
 def claude_chat():
     data = request.json
