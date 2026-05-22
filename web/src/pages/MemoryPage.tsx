@@ -26,7 +26,7 @@ function Metric({
         background: 'var(--surf-1)',
         border: '1px solid var(--border)',
         borderRadius: 12,
-        boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.04)',
+        boxShadow: 'inset 0 1px 0 var(--inset-hi)',
       }}
     >
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
@@ -124,7 +124,7 @@ export function MemoryPage({ memory }: Props) {
           background: 'var(--surf-1)',
           border: '1px solid var(--border)',
           borderRadius: 12,
-          boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.04)',
+          boxShadow: 'inset 0 1px 0 var(--inset-hi)',
         }}
       >
         <div style={{ fontSize: 10, color: 'var(--text-3)', letterSpacing: '0.8px', textTransform: 'uppercase', marginBottom: 10 }}>

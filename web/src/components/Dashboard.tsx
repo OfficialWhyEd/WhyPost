@@ -87,7 +87,7 @@ export function Dashboard({
           {/* Theme toggle */}
           <motion.button
             onClick={onToggleTheme}
-            whileHover={{ scale: 1.06, background: 'rgba(255,255,255,0.06)' as never }}
+            whileHover={{ scale: 1.06, background: 'var(--surf-3)' as never }}
             whileTap={{ scale: 0.92 }}
             transition={{ type: 'spring' as const, stiffness: 500, damping: 30 }}
             title={theme === 'dark' ? 'Tema chiaro' : 'Tema scuro'}
@@ -104,7 +104,7 @@ export function Dashboard({
           {/* Options button */}
           <motion.button
             onClick={() => setShowOpts(true)}
-            whileHover={{ scale: 1.04, background: 'rgba(255,255,255,0.06)' as never }}
+            whileHover={{ scale: 1.04, background: 'var(--surf-3)' as never }}
             whileTap={{ scale: 0.93 }}
             transition={{ type: 'spring' as const, stiffness: 500, damping: 30 }}
             style={{
@@ -132,12 +132,12 @@ export function Dashboard({
             style={{
               display: 'flex', alignItems: 'center', gap: 6,
               padding: '5px 12px',
-              background: pipelineRunning ? 'rgba(52,211,153,0.07)' : 'rgba(255,255,255,0.05)',
-              border: `1px solid ${pipelineRunning ? 'rgba(52,211,153,0.22)' : 'rgba(255,255,255,0.1)'}`,
+              background: pipelineRunning ? 'rgba(52,211,153,0.07)' : 'var(--surf-2)',
+              border: `1px solid ${pipelineRunning ? 'rgba(52,211,153,0.22)' : 'var(--border-hi)'}`,
               borderRadius: 8, cursor: pipelineRunning ? 'default' : 'pointer',
               color: pipelineRunning ? 'var(--accent)' : 'var(--text-2)',
               fontSize: 11, fontWeight: 600,
-              boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.06)',
+              boxShadow: 'inset 0 1px 0 var(--inset-hi)',
               transition: 'background 0.2s, border-color 0.2s, color 0.2s',
             }}
           >

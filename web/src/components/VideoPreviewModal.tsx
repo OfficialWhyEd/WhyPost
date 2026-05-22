@@ -16,7 +16,7 @@ const STATUS_COLOR: Record<string, string> = {
   ready: 'var(--accent)',
   rendered: '#60a5fa',
   assets_ready: 'var(--warn)',
-  scripted: 'rgba(255,255,255,0.38)',
+  scripted: 'var(--text-2)',
   needs_fix: 'var(--danger)',
   published: 'rgba(52,211,153,0.45)',
 }
@@ -134,7 +134,7 @@ export function VideoPreviewModal({ video, onClose, onRefresh }: Props) {
             backdropFilter: 'blur(40px) saturate(180%)',
             WebkitBackdropFilter: 'blur(40px) saturate(180%)',
             border: '1px solid var(--border-hi)',
-            boxShadow: '0 1px 0 0 rgba(255,255,255,0.1) inset, 0 24px 80px rgba(0,0,0,0.7)',
+            boxShadow: '0 1px 0 0 var(--inset-hi) inset, 0 24px 80px rgba(0,0,0,0.7)',
             borderRadius: 18, overflow: 'hidden', display: 'flex', flexDirection: 'column',
           }}
         >
@@ -147,9 +147,9 @@ export function VideoPreviewModal({ video, onClose, onRefresh }: Props) {
             <div style={{ display: 'flex', alignItems: 'center', gap: 10, flex: 1, minWidth: 0 }}>
               <div style={{
                 padding: '2px 8px', borderRadius: 20, fontSize: 10, fontWeight: 700,
-                background: `${STATUS_COLOR[d.status] ?? 'rgba(255,255,255,0.1)'}22`,
+                background: `${STATUS_COLOR[d.status] ?? 'var(--text-3)'}22`,
                 color: STATUS_COLOR[d.status] ?? 'var(--text-2)',
-                border: `1px solid ${STATUS_COLOR[d.status] ?? 'rgba(255,255,255,0.1)'}44`,
+                border: `1px solid ${STATUS_COLOR[d.status] ?? 'var(--text-3)'}44`,
                 flexShrink: 0,
               }}>
                 {STATUS_LABEL[d.status] ?? d.status}
@@ -289,7 +289,7 @@ export function VideoPreviewModal({ video, onClose, onRefresh }: Props) {
                       <div style={{
                         fontSize: 11, color: 'var(--text-3)', lineHeight: 1.6,
                         background: 'var(--surf-1)', borderRadius: 8, padding: 10,
-                        borderLeft: '2px solid rgba(255,255,255,0.1)',
+                        borderLeft: '2px solid var(--border-hi)',
                       }}>
                         {d.assets.tts_text}
                       </div>

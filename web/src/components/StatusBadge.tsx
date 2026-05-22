@@ -41,7 +41,7 @@ export function StatusBadge({ status, serverOk }: Props) {
         border: `1px solid ${borderColor}`,
         borderRadius: 20,
         /* Inner refraction */
-        boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.06)',
+        boxShadow: 'inset 0 1px 0 var(--inset-hi)',
       }}
     >
       <PulseDot color={accent} animate={running} />

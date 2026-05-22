@@ -154,7 +154,7 @@ export function SocialConnectModal({ onClose }: { onClose: () => void }) {
           border: '1px solid var(--border-hi)',
           borderRadius: 16,
           overflow: 'hidden',
-          boxShadow: '0 32px 80px rgba(0,0,0,0.65), inset 0 1px 0 rgba(255,255,255,0.07)',
+          boxShadow: '0 32px 80px rgba(0,0,0,0.65), inset 0 1px 0 var(--inset-hi)',
           display: 'flex', flexDirection: 'column',
         }}
       >
@@ -262,7 +262,7 @@ export function SocialConnectModal({ onClose }: { onClose: () => void }) {
                         transition: 'background 0.25s, border-color 0.25s',
                         boxShadow: connected
                           ? `inset 0 1px 0 ${p.color}12`
-                          : 'inset 0 1px 0 rgba(255,255,255,0.03)',
+                          : 'inset 0 1px 0 var(--inset-hi)',
                       }}
                     >
                       <div style={{

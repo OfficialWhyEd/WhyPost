@@ -59,7 +59,7 @@ export function Statistics({ state, queue }: Props) {
     ready:        queue.filter(v => v.status === 'ready').length,
   };
   const pipelineData = [
-    { stage: 'Script', v: statusCounts.scripted,     color: 'rgba(255,255,255,0.3)' },
+    { stage: 'Script', v: statusCounts.scripted,     color: 'var(--text-3)' },
     { stage: 'Asset',  v: statusCounts.assets_ready, color: 'var(--warn)' },
     { stage: 'Render', v: statusCounts.rendered,     color: '#60a5fa' },
     { stage: 'Pronto', v: statusCounts.ready,        color: 'var(--accent)' },
@@ -104,7 +104,7 @@ export function Statistics({ state, queue }: Props) {
           background: pct >= 0.7 ? 'rgba(52,211,153,0.04)' : 'var(--surf-1)',
           border: `1px solid ${pct >= 0.7 ? 'rgba(52,211,153,0.16)' : 'var(--border)'}`,
           borderRadius: 12,
-          boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.04)',
+          boxShadow: 'inset 0 1px 0 var(--inset-hi)',
           display: 'flex', flexDirection: 'column', justifyContent: 'space-between',
         }}>
           <div style={{ fontSize: 9, color: 'var(--text-3)', letterSpacing: '1px', textTransform: 'uppercase', marginBottom: 8 }}>
@@ -162,7 +162,7 @@ export function Statistics({ state, queue }: Props) {
           background: 'var(--surf-1)',
           border: '1px solid var(--border)',
           borderRadius: 12,
-          boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.04)',
+          boxShadow: 'inset 0 1px 0 var(--inset-hi)',
           display: 'flex', flexDirection: 'column', justifyContent: 'space-between',
         }}>
           <div style={{ fontSize: 9, color: 'var(--text-3)', letterSpacing: '1px', textTransform: 'uppercase', marginBottom: 8 }}>
@@ -185,7 +185,7 @@ export function Statistics({ state, queue }: Props) {
           background: 'var(--surf-1)',
           border: '1px solid var(--border)',
           borderRadius: 12,
-          boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.04)',
+          boxShadow: 'inset 0 1px 0 var(--inset-hi)',
           display: 'flex', flexDirection: 'column', justifyContent: 'space-between',
         }}>
           <div style={{ fontSize: 9, color: 'var(--text-3)', letterSpacing: '1px', textTransform: 'uppercase', marginBottom: 8 }}>
@@ -219,7 +219,7 @@ export function Statistics({ state, queue }: Props) {
         display: 'grid', gridTemplateColumns: '1fr 1px 1fr',
         border: '1px solid var(--border)', borderRadius: 12,
         overflow: 'hidden', marginBottom: 10,
-        boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.04)',
+        boxShadow: 'inset 0 1px 0 var(--inset-hi)',
       }}>
         <div style={{ padding: '12px 14px 10px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 6 }}>

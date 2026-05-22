@@ -12,15 +12,15 @@ const STATUS_COLOR: Record<string, string> = {
   published: 'rgba(52,211,153,0.45)',
 };
 
-type VideoType = 'TechNews' | 'Tutorial' | 'BestOf';
-const VIDEO_TYPES: VideoType[] = ['TechNews', 'Tutorial', 'BestOf'];
+type VideoType = 'WhyMultiTemplate' | 'Tutorial' | 'BestOf';
+const VIDEO_TYPES: VideoType[] = ['WhyMultiTemplate', 'Tutorial', 'BestOf'];
 const TYPE_COLOR: Record<VideoType, string> = {
-  TechNews: '#60a5fa',
+  WhyMultiTemplate: '#60a5fa',
   Tutorial: 'var(--warn)',
   BestOf:   'var(--accent)',
 };
 const TYPE_SHORT: Record<VideoType, string> = {
-  TechNews: 'NEWS',
+  WhyMultiTemplate: 'MULTI',
   Tutorial: 'TUT',
   BestOf:   'BEST',
 };
@@ -41,7 +41,7 @@ function IgIcon() {
 function TkIcon() {
   return (
     <svg width="10" height="10" viewBox="0 0 24 24" fill="none" style={{ flexShrink: 0 }}>
-      <path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 00-.79-.05A6.34 6.34 0 003.15 15.3a6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.34-6.34V8.69a8.16 8.16 0 004.77 1.52V6.76a4.85 4.85 0 01-1.01-.07z" fill="rgba(255,255,255,0.75)"/>
+      <path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 00-.79-.05A6.34 6.34 0 003.15 15.3a6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.34-6.34V8.69a8.16 8.16 0 004.77 1.52V6.76a4.85 4.85 0 01-1.01-.07z" fill="var(--text)"/>
     </svg>
   );
 }
@@ -363,7 +363,7 @@ export function Calendar({ queue, onVideoClick }: Props) {
                       </div>
                       <div style={{
                         width: 5, height: 5, borderRadius: '50%', flexShrink: 0,
-                        background: STATUS_COLOR[v.status] ?? 'rgba(255,255,255,0.3)',
+                        background: STATUS_COLOR[v.status] ?? 'var(--text-3)',
                       }} />
                     </div>
                     <div style={{

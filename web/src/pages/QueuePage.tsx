@@ -7,7 +7,7 @@ const STATUS_COLOR: Record<string, string> = {
   ready:        'var(--accent)',
   rendered:     '#60a5fa',
   assets_ready: 'var(--warn)',
-  scripted:     'rgba(255,255,255,0.38)',
+  scripted:     'var(--text-2)',
   needs_fix:    'var(--danger)',
   published:    'rgba(52,211,153,0.45)',
 };
@@ -176,7 +176,7 @@ export function QueuePage({ queue, onVideoClick }: Props) {
                     background: 'var(--surf-1)',
                     border: `1px solid ${v.status === 'needs_fix' ? 'rgba(248,113,113,0.12)' : v.status === 'ready' ? 'rgba(52,211,153,0.1)' : 'var(--border)'}`,
                     borderRadius: 10, cursor: 'pointer', textAlign: 'left',
-                    boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.04)',
+                    boxShadow: 'inset 0 1px 0 var(--inset-hi)',
                     transition: 'background 0.15s, border-color 0.15s',
                     width: '100%',
                   }}
@@ -213,7 +213,7 @@ export function QueuePage({ queue, onVideoClick }: Props) {
                       <span key={p} className="mono" style={{
                         fontSize: 9, fontWeight: 700,
                         padding: '2px 6px', borderRadius: 4,
-                        background: 'rgba(255,255,255,0.05)',
+                        background: 'var(--surf-2)',
                         color: 'var(--text-3)', letterSpacing: '0.5px',
                       }}>
                         {PLAT_SHORT[p] ?? p.slice(0,2).toUpperCase()}

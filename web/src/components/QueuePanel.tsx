@@ -5,7 +5,7 @@ const STATUS_COLOR: Record<string, string> = {
   ready: 'var(--accent)',
   rendered: '#60a5fa',
   assets_ready: 'var(--warn)',
-  scripted: 'rgba(255,255,255,0.38)',
+  scripted: 'var(--text-2)',
   needs_fix: 'var(--danger)',
   published: 'rgba(52,211,153,0.45)',
 };
@@ -71,7 +71,7 @@ export function QueuePanel({ queue, onVideoClick }: Props) {
           style={{
             padding: '36px 18px', textAlign: 'center',
             color: 'var(--text-3)', fontSize: 12, lineHeight: 1.7,
-            border: '1px dashed rgba(255,255,255,0.07)', borderRadius: 12,
+            border: '1px dashed var(--border)', borderRadius: 12,
           }}
         >
           Nessun video in coda.
@@ -180,7 +180,7 @@ function VideoCard({ video, status, onClick }: { video: VideoItem; status: strin
           ready  ? 'rgba(52,211,153,0.09)' :
                    'var(--border)'}`,
         borderRadius: 10, cursor: 'pointer', textAlign: 'left', width: '100%',
-        boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.04)',
+        boxShadow: 'inset 0 1px 0 var(--inset-hi)',
         transition: 'background 0.15s, border-color 0.15s',
       } as React.CSSProperties}
     >
@@ -210,7 +210,7 @@ function VideoCard({ video, status, onClick }: { video: VideoItem; status: strin
             <span key={p} className="mono" style={{
               fontSize: 9, fontWeight: 700,
               padding: '2px 5px', borderRadius: 4,
-              background: 'rgba(255,255,255,0.05)',
+              background: 'var(--surf-2)',
               color: 'var(--text-3)',
               letterSpacing: '0.5px',
             }}>
@@ -221,7 +221,7 @@ function VideoCard({ video, status, onClick }: { video: VideoItem; status: strin
             <span className="mono" style={{
               fontSize: 9, fontWeight: 600,
               padding: '2px 5px', borderRadius: 4,
-              background: 'rgba(255,255,255,0.04)',
+              background: 'var(--surf-2)',
               color: 'var(--text-3)',
             }}>
               {video.language.toUpperCase()}
