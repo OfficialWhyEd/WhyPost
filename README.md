@@ -34,6 +34,12 @@ EXEL (idea engine) → Script Writer → Remotion (video) → Publisher
 
 ---
 
+<p align="center">
+  <img src="assets/screenshot-mission-control.png" alt="Mission Control Dashboard" width="100%"/>
+</p>
+
+---
+
 ## Features
 
 - **10 cron job attivi** — pubblica ogni giorno senza intervento manuale
