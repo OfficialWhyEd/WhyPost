@@ -75,14 +75,44 @@ export function BottomBar({
   targetDays: number;
   nextPublish?: string | null;
 }) {
-  const [topics, setTopics]           = useState<Topic[]>(INITIAL_TOPICS);
-  const [blacklist, setBlacklist]     = useState<string[]>(INITIAL_BLACKLIST);
+  const [topics, setTopics]           = useState<Topic[]>([]);
+  const [blacklist, setBlacklist]     = useState<string[]>([]);
   const [addingTopic, setAddingTopic] = useState(false);
   const [addingBlock, setAddingBlock] = useState(false);
   const [newTopic, setNewTopic]       = useState('');
   const [newBlock, setNewBlock]       = useState('');
   const [localTarget, setLocalTarget] = useState(targetDays);
   const [activePlats, setActivePlats] = useState<Set<string>>(new Set(['instagram']));
+
+  // Load topics and blacklist from backend at mount
+  useEffect(() => {
+    fetch('/api/config')
+      .then(r => r.ok ? r.json() : null)
+      .then(cfg => {
+        if (!cfg) return;
+        const rawTopics: string[] = cfg?.content?.topics ?? [];
+        const rawBlacklist: string[] = cfg?.content?.blacklist ?? [];
+        if (rawTopics.length) {
+          setTopics(rawTopics.map((label, i) => ({
+            id: String(i + 1),
+            label,
+            active: true,
+            trending: false,
+          })));
+        } else {
+          setTopics(INITIAL_TOPICS);
+        }
+        if (rawBlacklist.length) {
+          setBlacklist(rawBlacklist);
+        } else {
+          setBlacklist(INITIAL_BLACKLIST);
+        }
+      })
+      .catch(() => {
+        setTopics(INITIAL_TOPICS);
+        setBlacklist(INITIAL_BLACKLIST);
+      });
+  }, []);
 
   // Debounced config sync
   const syncTimer = useRef<ReturnType<typeof setTimeout> | null>(null);

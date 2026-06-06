@@ -13,15 +13,15 @@ const STATUS_COLOR: Record<string, string> = {
   published:    'rgba(52,211,153,0.55)',
 };
 
-type VideoType = 'TechNews' | 'Tutorial' | 'BestOf';
-const VIDEO_TYPES: VideoType[] = ['TechNews', 'Tutorial', 'BestOf'];
+type VideoType = 'WhyMultiTemplate' | 'Tutorial' | 'BestOf';
+const VIDEO_TYPES: VideoType[] = ['WhyMultiTemplate', 'Tutorial', 'BestOf'];
 const TYPE_COLOR: Record<VideoType, string> = {
-  TechNews: '#60a5fa',
+  WhyMultiTemplate: '#60a5fa',
   Tutorial: 'var(--warn)',
   BestOf:   'var(--accent)',
 };
 const TYPE_SHORT: Record<VideoType, string> = {
-  TechNews: 'NEWS',
+  WhyMultiTemplate: 'MULTI',
   Tutorial: 'TUT',
   BestOf:   'BEST',
 };
@@ -110,6 +110,73 @@ export function CalendarPage({ queue, onVideoClick }: Props) {
   const [editingDay, setEditingDay] = useState<string | null>(null);
   const [editValue, setEditValue]   = useState('');
   const [pickerDay, setPickerDay]   = useState<string | null>(null);
+  const [dragOverDay, setDragOverDay] = useState<string | null>(null);
+
+  // Load state from backend at mount
+  useEffect(() => {
+    // Load daily_topics from config.yaml
+    fetch('/api/config')
+      .then(r => r.ok ? r.json() : null)
+      .then(cfg => {
+        if (!cfg?.daily_topics) return;
+        const topics: Record<string, string> = {};
+        const dt = cfg.daily_topics as Record<string, string | null>;
+        // Map day names en→current date range (a few weeks around now)
+        const now = new Date();
+        for (let w = -1; w <= 5; w++) {
+          for (let d = 0; d < 7; d++) {
+            const date = new Date(now);
+            date.setDate(now.getDate() - now.getDay() + 1 + d + w * 7);
+            const dayNames = ['monday','tuesday','wednesday','thursday','friday','saturday','sunday'];
+            const val = dt[dayNames[d]];
+            if (val) topics[dayKey(date.getFullYear(), date.getMonth(), date.getDate())] = val;
+          }
+        }
+        setDayTopics(topics);
+      })
+      .catch(() => {});
+
+    // Load dayTypes from calendar_types endpoint
+    fetch('/api/calendar-types')
+      .then(r => r.ok ? r.json() : null)
+      .then(data => { if (data) setDayTypes(data); })
+      .catch(() => {});
+  }, []);
+
+  // Persist dayTopic — updates state and syncs to config.yaml
+  async function saveDayTopic(dk: string, value: string) {
+    setDayTopics(prev => ({ ...prev, [dk]: value }));
+    // Convert dk (YYYY-MM-DD) to day name for config.yaml
+    const date = new Date(dk);
+    const dayNames = ['sunday','monday','tuesday','wednesday','thursday','friday','saturday'];
+    const dayName = dayNames[date.getDay()];
+    try {
+      const cfgRes = await fetch('/api/config');
+      if (!cfgRes.ok) return;
+      const cfg = await cfgRes.json();
+      cfg.daily_topics = cfg.daily_topics ?? {};
+      cfg.daily_topics[dayName] = value.trim() || null;
+      await fetch('/api/config', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(cfg),
+      });
+    } catch { /* ignore */ }
+  }
+
+  // Persist dayType — updates state and syncs to calendar_types endpoint
+  async function saveDayType(dk: string, t: VideoType | null) {
+    const next = { ...dayTypes, [dk]: t };
+    if (t === null) delete next[dk];
+    setDayTypes(next);
+    try {
+      await fetch('/api/calendar-types', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(next),
+      });
+    } catch { /* ignore */ }
+  }
 
   function prevMonth() {
     if (viewMonth === 0) { setViewYear(y => y - 1); setViewMonth(11); }
@@ -162,10 +229,21 @@ export function CalendarPage({ queue, onVideoClick }: Props) {
             pianificazione mensile
           </p>
 
-          {/* Type legend */}
+          {/* Type legend — draggable chips */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginLeft: 8 }}>
             {VIDEO_TYPES.map(t => (
-              <div key={t} style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+              <div
+                key={t}
+                draggable
+                onDragStart={e => {
+                  e.dataTransfer.setData('text/plain', t);
+                  e.dataTransfer.effectAllowed = 'copy';
+                }}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: 4,
+                  cursor: 'grab', userSelect: 'none',
+                }}
+              >
                 <span style={{ width: 5, height: 5, borderRadius: '50%', background: TYPE_COLOR[t], opacity: 0.7, flexShrink: 0, display: 'inline-block' }} />
                 <span style={{ fontSize: 9, color: 'var(--text-3)' }}>{t}</span>
               </div>
@@ -238,17 +316,32 @@ export function CalendarPage({ queue, onVideoClick }: Props) {
             const dk = dayKey(viewYear, viewMonth, day);
             const topic = dayTopics[dk] ?? null;
             const vtype = dayTypes[dk] ?? null;
+            const isDragOver = dragOverDay === dk;
 
             return (
               <motion.div
                 key={`${viewYear}-${viewMonth}-${day}`}
                 layout
-                whileHover={!todayCell ? { borderColor: 'var(--border-hi)' as never } : {}}
+                whileHover={!todayCell && !isDragOver ? { borderColor: 'var(--border-hi)' as never } : {}}
                 transition={{ duration: 0.15 }}
+                onDragOver={e => { e.preventDefault(); setDragOverDay(dk); }}
+                onDragLeave={() => setDragOverDay(null)}
+                onDrop={e => {
+                  e.preventDefault();
+                  const t = e.dataTransfer.getData('text/plain') as VideoType;
+                  if (VIDEO_TYPES.includes(t)) saveDayType(dk, t);
+                  setDragOverDay(null);
+                }}
                 style={{
                   position: 'relative',
-                  background: todayCell ? 'rgba(52,211,153,0.05)' : 'var(--surf-1)',
-                  border: `1px solid ${todayCell ? 'rgba(52,211,153,0.2)' : 'var(--border)'}`,
+                  background: isDragOver
+                    ? 'rgba(96,165,250,0.06)'
+                    : todayCell ? 'rgba(52,211,153,0.05)' : 'var(--surf-1)',
+                  border: `1px solid ${
+                    isDragOver
+                      ? (vtype ? TYPE_COLOR[vtype as VideoType] : 'var(--border-hi)')
+                      : todayCell ? 'rgba(52,211,153,0.2)' : 'var(--border)'
+                  }`,
                   borderRadius: 9,
                   padding: '6px 7px 5px',
                   display: 'flex', flexDirection: 'column',
@@ -256,7 +349,7 @@ export function CalendarPage({ queue, onVideoClick }: Props) {
                   boxShadow: todayCell
                     ? 'inset 0 1px 0 rgba(52,211,153,0.1)'
                     : 'inset 0 1px 0 var(--inset-hi)',
-                  transition: 'border-color 0.15s',
+                  transition: 'border-color 0.15s, background 0.15s',
                 }}
               >
                 {/* Day number + type chip */}
@@ -295,7 +388,7 @@ export function CalendarPage({ queue, onVideoClick }: Props) {
                       {pickerDay === dk && (
                         <TypePicker
                           current={vtype}
-                          onSelect={t => setDayTypes(prev => ({ ...prev, [dk]: t }))}
+                          onSelect={t => saveDayType(dk, t)}
                           onClose={() => setPickerDay(null)}
                         />
                       )}
@@ -310,10 +403,16 @@ export function CalendarPage({ queue, onVideoClick }: Props) {
                     value={editValue}
                     onChange={e => setEditValue(e.target.value)}
                     onKeyDown={e => {
-                      if (e.key === 'Enter') { setDayTopics(prev => ({ ...prev, [dk]: editValue.trim() })); setEditingDay(null); }
+                      if (e.key === 'Enter') {
+                        saveDayTopic(dk, editValue.trim());
+                        setEditingDay(null);
+                      }
                       if (e.key === 'Escape') setEditingDay(null);
                     }}
-                    onBlur={() => { setDayTopics(prev => ({ ...prev, [dk]: editValue.trim() })); setEditingDay(null); }}
+                    onBlur={() => {
+                      saveDayTopic(dk, editValue.trim());
+                      setEditingDay(null);
+                    }}
                     placeholder="argomento..."
                     style={{
                       width: '100%', background: 'transparent', border: 'none',

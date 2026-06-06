@@ -95,6 +95,19 @@ def write_script(idea: dict, language: str, video_type: str) -> dict | None:
     prompt = prompt.replace("{VIDEO_TYPE}", video_type)
     prompt += build_memory_context(idea)
 
+    # Web search: inietta contesto aggiornato sull'argomento
+    try:
+        from agents.web_search import get_topic_context
+        web_ctx = get_topic_context(idea["title"], lang=language)
+        if web_ctx:
+            prompt += (
+                "\n\n---\nCONTESTO WEB AGGIORNATO (fonti recenti — usa per rendere lo script preciso e attuale):\n"
+                + web_ctx[:1200]
+            )
+            logger.info(f"[SCRIPT] Contesto web iniettato per: {idea['title'][:50]}")
+    except Exception as e:
+        logger.warning(f"[SCRIPT] web_search skip: {e}")
+
     raw = ask_claude(prompt, model="sonnet")
     if not raw:
         remember_error("SCRIPT", "claude_no_response", "Claude non ha risposto", "Verifica rate limit e connessione")

@@ -2,10 +2,10 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   LayoutDashboard, Film, CalendarDays,
-  Bot, BrainCircuit, Settings, Sun, Moon,
+  Bot, BrainCircuit, Settings, Sun, Moon, Clapperboard,
 } from 'lucide-react';
 
-export type Page = 'home' | 'queue' | 'calendar' | 'agents' | 'memory' | 'settings';
+export type Page = 'home' | 'queue' | 'calendar' | 'agents' | 'memory' | 'clack' | 'settings';
 
 interface NavItem {
   id: Page;
@@ -15,12 +15,13 @@ interface NavItem {
 }
 
 const NAV: NavItem[] = [
-  { id: 'home',     icon: LayoutDashboard, label: 'Home',        group: 'main'   },
-  { id: 'queue',    icon: Film,            label: 'Coda video',  group: 'main'   },
-  { id: 'calendar', icon: CalendarDays,    label: 'Calendario',  group: 'main'   },
-  { id: 'agents',   icon: Bot,             label: 'Agenti',      group: 'main'   },
-  { id: 'memory',   icon: BrainCircuit,    label: 'Memoria AI',  group: 'main'   },
-  { id: 'settings', icon: Settings,        label: 'Impostazioni',group: 'system' },
+  { id: 'home',     icon: LayoutDashboard, label: 'Home',           group: 'main'   },
+  { id: 'queue',    icon: Film,            label: 'Coda video',     group: 'main'   },
+  { id: 'calendar', icon: CalendarDays,    label: 'Calendario',     group: 'main'   },
+  { id: 'agents',   icon: Bot,             label: 'Agenti',         group: 'main'   },
+  { id: 'memory',   icon: BrainCircuit,    label: 'Memoria AI',     group: 'main'   },
+  { id: 'clack',    icon: Clapperboard,    label: 'WhyClack',       group: 'main'   },
+  { id: 'settings', icon: Settings,        label: 'Impostazioni',   group: 'system' },
 ];
 
 interface Props {

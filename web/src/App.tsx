@@ -9,6 +9,7 @@ import { CalendarPage } from './pages/CalendarPage'
 import { AgentsPage } from './pages/AgentsPage'
 import { MemoryPage } from './pages/MemoryPage'
 import { SettingsPage } from './pages/SettingsPage'
+import { ClackDirectorPage } from './pages/ClackDirectorPage'
 import { useStore } from './hooks/useStore'
 import type { VideoItem } from './types'
 
@@ -54,6 +55,7 @@ export default function App() {
               pipelineRunning={pipelineRunning}
               theme={theme}
               onToggleTheme={toggleTheme}
+              onNavigate={setPage}
             />
           )}
           {page === 'queue' && (
@@ -70,6 +72,9 @@ export default function App() {
           )}
           {page === 'settings' && (
             <SettingsPage key="settings" />
+          )}
+          {page === 'clack' && (
+            <ClackDirectorPage key="clack" />
           )}
         </AnimatePresence>
       </div>

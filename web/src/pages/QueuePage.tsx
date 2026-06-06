@@ -51,7 +51,7 @@ export function QueuePage({ queue, onVideoClick }: Props) {
 
   const filtered = queue
     .filter(v => tab === 'tutti' || v.status === tab)
-    .filter(v => !search || v.title.toLowerCase().includes(search.toLowerCase()));
+    .filter(v => !search || (v.title ?? '').toLowerCase().includes(search.toLowerCase()));
 
   const countFor = (t: Tab) => t === 'tutti' ? queue.length : queue.filter(v => v.status === t).length;
 
@@ -223,7 +223,7 @@ export function QueuePage({ queue, onVideoClick }: Props) {
 
                   {/* Date */}
                   <span className="mono" style={{ fontSize: 10, color: 'var(--text-3)', width: 56, textAlign: 'right' }}>
-                    {fmt(v.scheduled_at)}
+                    {fmt(v.scheduled_at ?? null)}
                   </span>
 
                   {/* Status label */}

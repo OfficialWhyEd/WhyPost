@@ -74,6 +74,20 @@ def set_config():
     (BASE / "config.yaml").write_text(yaml.dump(data, allow_unicode=True))
     return jsonify({"ok": True})
 
+@app.route("/api/calendar-types", methods=["GET"])
+def get_calendar_types():
+    p = BASE / "data" / "calendar_types.json"
+    try:
+        return jsonify(json.loads(p.read_text()) if p.exists() else {})
+    except Exception:
+        return jsonify({})
+
+@app.route("/api/calendar-types", methods=["POST"])
+def set_calendar_types():
+    p = BASE / "data" / "calendar_types.json"
+    p.write_text(json.dumps(request.json or {}, ensure_ascii=False, indent=2))
+    return jsonify({"ok": True})
+
 @app.route("/api/queue/add", methods=["POST"])
 @app.route("/queue/add", methods=["POST"])
 def add_to_queue():
@@ -702,6 +716,95 @@ def detect_ig_account_id():
         return jsonify({"ok": False, "error": str(e)[:150]})
 
 # ── END CREDENTIALS ───────────────────────────────────────────────────────────
+
+# ── SOCIAL STATS ──────────────────────────────────────────────────────────────
+
+@app.route("/api/social-stats")
+def social_stats():
+    """Fetch follower/post counts dalle API social collegate."""
+    import urllib.request, urllib.error
+    env = _read_env()
+    result = {}
+
+    # Instagram
+    ig_token = env.get("IG_ACCESS_TOKEN", "")
+    ig_account = env.get("IG_ACCOUNT_ID", "")
+    if ig_token and ig_account:
+        try:
+            url = (f"https://graph.facebook.com/v20.0/{ig_account}"
+                   f"?fields=followers_count,media_count,username,name"
+                   f"&access_token={ig_token}")
+            resp = urllib.request.urlopen(url, timeout=8)
+            d = json.loads(resp.read())
+            result["instagram"] = {
+                "ok": True,
+                "username": d.get("username") or d.get("name", ""),
+                "followers": d.get("followers_count", 0),
+                "posts": d.get("media_count", 0),
+            }
+        except Exception as e:
+            result["instagram"] = {"ok": False, "error": str(e)[:100]}
+    else:
+        result["instagram"] = {"ok": False, "error": "non configurato"}
+
+    # TikTok
+    tt_token = env.get("TT_ACCESS_TOKEN", "")
+    if tt_token:
+        try:
+            req = urllib.request.Request(
+                "https://open.tiktokapis.com/v2/user/info/"
+                "?fields=display_name,follower_count,following_count,likes_count,video_count",
+                headers={"Authorization": f"Bearer {tt_token}"},
+            )
+            resp = urllib.request.urlopen(req, timeout=8)
+            d = json.loads(resp.read()).get("data", {}).get("user", {})
+            result["tiktok"] = {
+                "ok": True,
+                "username": d.get("display_name", ""),
+                "followers": d.get("follower_count", 0),
+                "likes": d.get("likes_count", 0),
+                "videos": d.get("video_count", 0),
+            }
+        except Exception as e:
+            result["tiktok"] = {"ok": False, "error": str(e)[:100]}
+    else:
+        result["tiktok"] = {"ok": False, "error": "non configurato"}
+
+    return jsonify(result)
+
+# ── END SOCIAL STATS ──────────────────────────────────────────────────────────
+
+# ── PIPELINE CONFIG ───────────────────────────────────────────────────────────
+
+@app.route("/api/pipeline-config", methods=["GET"])
+def get_pipeline_config():
+    """Legge impostazioni pipeline da config.yaml."""
+    cfg = read_yaml(BASE / "config.yaml")
+    return jsonify({
+        "target_days":     cfg.get("buffer", {}).get("target_days", 7),
+        "videos_per_day":  cfg.get("pipeline", {}).get("videos_per_day", 2),
+        "schedule_slots":  cfg.get("pipeline", {}).get("schedule_slots", ["08:00", "13:30", "20:00"]),
+        "platforms":       cfg.get("platforms", {}),
+    })
+
+@app.route("/api/pipeline-config", methods=["POST"])
+def set_pipeline_config():
+    """Salva impostazioni pipeline in config.yaml."""
+    data = request.json or {}
+    cfg_path = BASE / "config.yaml"
+    cfg = read_yaml(cfg_path) or {}
+    if "target_days" in data:
+        cfg.setdefault("buffer", {})["target_days"] = int(data["target_days"])
+    if "videos_per_day" in data:
+        cfg.setdefault("pipeline", {})["videos_per_day"] = int(data["videos_per_day"])
+    if "schedule_slots" in data:
+        cfg.setdefault("pipeline", {})["schedule_slots"] = data["schedule_slots"]
+    if "platforms" in data:
+        cfg["platforms"] = data["platforms"]
+    cfg_path.write_text(yaml.dump(cfg, allow_unicode=True))
+    return jsonify({"ok": True})
+
+# ── END PIPELINE CONFIG ───────────────────────────────────────────────────────
 
 # ── END VIDEO PREVIEW ────────────────────────────────────────────────────────
 

@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence, useMotionValue, useTransform, animate } from 'framer-motion';
-import { ArrowUp, ChevronLeft, ChevronRight, MessageSquare, Zap } from 'lucide-react';
+import { ArrowUp, ChevronLeft, ChevronRight, MessageSquare, Zap, CalendarDays } from 'lucide-react';
+import { WeekPlanner } from './WeekPlanner';
 import type { ChatMessage } from '../types';
 
 const DEFAULT_PROMPTS = [
@@ -34,7 +35,7 @@ export function ChatSidebar({ onSend, collapsed, onCollapse }: Props) {
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const [inputFocused, setInputFocused] = useState(false);
-  const [tab, setTab] = useState<'chat' | 'prompts'>('chat');
+  const [tab, setTab] = useState<'chat' | 'prompts' | 'plan'>('chat');
   const [prompts, setPrompts] = useState(DEFAULT_PROMPTS);
   const bottomRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -176,22 +177,27 @@ export function ChatSidebar({ onSend, collapsed, onCollapse }: Props) {
           border: '1px solid var(--border)',
           borderRadius: 8, padding: 3,
         }}>
-          {(['chat', 'prompts'] as const).map(t => (
+            {([
+            { id: 'chat',    icon: <MessageSquare size={10} />, label: 'Chat' },
+            { id: 'prompts', icon: <Zap size={10} />,           label: 'Prompt' },
+            { id: 'plan',    icon: <CalendarDays size={10} />,  label: 'Pianifica' },
+          ] as const).map(t => (
             <button
-              key={t}
-              onClick={() => setTab(t)}
+              key={t.id}
+              onClick={() => setTab(t.id)}
               style={{
-                flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5,
-                padding: '5px 8px', borderRadius: 6, border: 'none', cursor: 'pointer',
-                background: tab === t ? 'var(--surf-3)' : 'transparent',
-                color: tab === t ? 'var(--text)' : 'var(--text-3)',
-                fontSize: 10, fontWeight: 600, fontFamily: 'Geist, sans-serif',
+                flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4,
+                padding: '5px 6px', borderRadius: 6, border: 'none', cursor: 'pointer',
+                background: tab === t.id ? 'var(--surf-3)' : 'transparent',
+                color: tab === t.id ? 'var(--text)' : 'var(--text-3)',
+                fontSize: 9.5, fontWeight: 600, fontFamily: 'Geist, sans-serif',
                 transition: 'background 0.15s, color 0.15s',
-                boxShadow: tab === t ? 'inset 0 1px 0 var(--inset-hi)' : 'none',
+                boxShadow: tab === t.id ? 'inset 0 1px 0 var(--inset-hi)' : 'none',
+                whiteSpace: 'nowrap',
               }}
             >
-              {t === 'chat' ? <MessageSquare size={10} /> : <Zap size={10} />}
-              {t === 'chat' ? 'Chat' : 'Prompt'}
+              {t.icon}
+              {t.label}
             </button>
           ))}
         </div>
@@ -200,7 +206,9 @@ export function ChatSidebar({ onSend, collapsed, onCollapse }: Props) {
       {/* Content */}
       <div style={{ flex: 1, overflowY: 'auto', minHeight: 0 }}>
 
-        {tab === 'chat' ? (
+        {tab === 'plan' ? (
+          <WeekPlanner />
+        ) : tab === 'chat' ? (
           <div style={{ padding: '14px 14px 8px' }}>
 
             {/* Empty state */}

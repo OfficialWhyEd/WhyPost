@@ -19,8 +19,22 @@ def hash_title(title: str) -> str:
 
 def get_ideas_conn():
     import sqlite3
-    conn = sqlite3.connect(BASE / "data" / "ideas.db")
+    db_path = BASE / "data" / "ideas.db"
+    db_path.parent.mkdir(parents=True, exist_ok=True)
+    conn = sqlite3.connect(db_path)
     conn.row_factory = sqlite3.Row
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS ideas (
+            hash     TEXT PRIMARY KEY,
+            title    TEXT NOT NULL,
+            source   TEXT DEFAULT 'unknown',
+            topic    TEXT DEFAULT 'tech',
+            language TEXT DEFAULT 'it',
+            status   TEXT DEFAULT 'raw',
+            created_at TEXT DEFAULT (datetime('now'))
+        )
+    """)
+    conn.commit()
     return conn
 
 def save_idea(title: str, source: str, topic: str, language: str = "it"):
@@ -113,6 +127,18 @@ def run():
 
     scrape_hn(topics, blacklist)
     scrape_rss(topics, blacklist)
+
+    # Web search: argomenti trending reali — aggiorna le idee con contenuto attuale
+    try:
+        from agents.web_search import get_trending_topics
+        lang = cfg.get("content", {}).get("language", "it")
+        trending = get_trending_topics(lang=lang, count=8)
+        for t in trending:
+            save_idea(t, "web_search", topics[0] if topics else "tech", lang)
+        if trending:
+            logger.info(f"EXEL: +{len(trending)} argomenti trending da web search")
+    except Exception as e:
+        logger.warning(f"EXEL web_search skip: {e}")
 
     with get_ideas_conn() as conn:
         count = conn.execute("SELECT COUNT(*) FROM ideas WHERE status='raw'").fetchone()[0]

@@ -268,6 +268,16 @@ export function AgentGrid({ agents }: { agents: SystemState['agents'] }) {
             ? new Date(lastRun).toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' })
             : null;
 
+          // Weekly quota badge — solo per PUBLISHER
+          const weeklyUsed = a === 'PUBLISHER' ? (agents[a]?.weekly_used as number | undefined) : undefined;
+          const weeklyMax  = a === 'PUBLISHER' ? (agents[a]?.weekly_max  as number | undefined) : undefined;
+          const weeklyPct  = (weeklyUsed != null && weeklyMax != null && weeklyMax > 0)
+            ? Math.round((weeklyUsed / weeklyMax) * 100)
+            : null;
+          // Warn se ≥ 75% della quota usabile (= 75% di 40 = 30)
+          const quotaWarn = weeklyPct != null && weeklyPct >= 75;
+          const quotaCrit = weeklyPct != null && weeklyPct >= 95;
+
           return (
             <motion.div
               key={a}
@@ -290,7 +300,7 @@ export function AgentGrid({ agents }: { agents: SystemState['agents'] }) {
                 transition: 'background 0.2s, border-color 0.15s',
               }}
             >
-              <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: timeStr ? 4 : 0 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: timeStr || weeklyPct != null ? 4 : 0 }}>
                 <LiveDot running={running} error={error} />
                 <span className="mono" style={{
                   fontSize: 9, fontWeight: 700, letterSpacing: '0.4px',
@@ -301,13 +311,46 @@ export function AgentGrid({ agents }: { agents: SystemState['agents'] }) {
                 </span>
               </div>
               {timeStr && (
-                <div style={{ display: 'flex', alignItems: 'center', gap: 3, paddingLeft: 12 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 3, paddingLeft: 12, marginBottom: weeklyPct != null ? 4 : 0 }}>
                   <Clock size={7} color="var(--text-3)" />
                   <span className="mono" style={{
                     fontSize: 8, color: running ? 'rgba(52,211,153,0.6)' : 'var(--text-3)',
                     fontVariantNumeric: 'tabular-nums',
                   }}>
                     {timeStr}
+                  </span>
+                </div>
+              )}
+              {/* Weekly quota bar — solo PUBLISHER */}
+              {weeklyPct != null && weeklyMax != null && (
+                <div style={{ paddingLeft: 12 }}>
+                  <div style={{
+                    height: 3, borderRadius: 2,
+                    background: 'var(--surf-3)',
+                    overflow: 'hidden',
+                    marginBottom: 2,
+                  }}>
+                    <motion.div
+                      initial={{ width: 0 }}
+                      animate={{ width: `${Math.min(weeklyPct, 100)}%` }}
+                      transition={{ duration: 0.6, ease: 'easeOut' }}
+                      style={{
+                        height: '100%',
+                        background: quotaCrit
+                          ? 'var(--danger)'
+                          : quotaWarn
+                          ? 'oklch(78% 0.16 55)'
+                          : 'var(--accent)',
+                        borderRadius: 2,
+                      }}
+                    />
+                  </div>
+                  <span style={{
+                    fontSize: 7.5, color: quotaCrit ? 'var(--danger)' : quotaWarn ? 'oklch(78% 0.16 55)' : 'var(--text-3)',
+                    fontFamily: 'Geist Mono, monospace',
+                    fontVariantNumeric: 'tabular-nums',
+                  }}>
+                    {weeklyUsed}/{weeklyMax} settimana
                   </span>
                 </div>
               )}

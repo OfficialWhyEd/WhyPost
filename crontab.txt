@@ -1,8 +1,35 @@
-# WhyPost crontab — install: crontab ~/Documents/WhyPost/crontab.txt
-0 6 * * *    cd ~/Documents/WhyPost && source venv/bin/activate && python -m agents.exel
-0 7 * * *    cd ~/Documents/WhyPost && source venv/bin/activate && python -m agents.main check_buffer
-30 7 * * *   cd ~/Documents/WhyPost && source venv/bin/activate && python -m agents.asset
-0 8 * * *    cd ~/Documents/WhyPost && source venv/bin/activate && python -m agents.clack render
-*/15 * * * * cd ~/Documents/WhyPost && source venv/bin/activate && python -m agents.publisher
-0 22 * * *   cd ~/Documents/WhyPost && source venv/bin/activate && python -m agents.telemetry
-0 9 * * 0    cd ~/Documents/WhyPost && source venv/bin/activate && python -m agents.opus
+SHELL=/bin/bash
+PATH=/usr/local/bin:/usr/bin:/bin
+PYTHONPATH=/Users/whyed/Documents/WhyPost
+
+# WhyPost automation — install: crontab ~/Documents/WhyPost/crontab.txt
+
+# 06:00 — EXEL: scrape Reddit, HN, RSS → genera idee
+0 6 * * *    /Users/whyed/Documents/WhyPost/venv/bin/python3 -m agents.exel >> /Users/whyed/Documents/WhyPost/data/logs/exel.log 2>&1
+
+# 07:00 — SCRIPT: riempi buffer se < 7 giorni
+0 7 * * *    /Users/whyed/Documents/WhyPost/venv/bin/python3 -m agents.main check_buffer >> /Users/whyed/Documents/WhyPost/data/logs/script.log 2>&1
+
+# 07:30 — ASSET: genera audio + words.json
+30 7 * * *   /Users/whyed/Documents/WhyPost/venv/bin/python3 -m agents.asset >> /Users/whyed/Documents/WhyPost/data/logs/asset.log 2>&1
+
+# 08:00 — CLACK: render video Remotion
+0 8 * * *    /Users/whyed/Documents/WhyPost/venv/bin/python3 -m agents.clack >> /Users/whyed/Documents/WhyPost/data/logs/clack.log 2>&1
+
+# 08:30 — SAFETY: valida video pronti
+30 8 * * *   /Users/whyed/Documents/WhyPost/venv/bin/python3 -m agents.safety >> /Users/whyed/Documents/WhyPost/data/logs/safety.log 2>&1
+
+# Ogni 15 minuti 08:00-22:00 — PUBLISHER: pubblica video scheduled
+*/15 8-22 * * *  /Users/whyed/Documents/WhyPost/venv/bin/python3 -m agents.publisher >> /Users/whyed/Documents/WhyPost/data/logs/publisher.log 2>&1
+
+# 22:00 — TELEMETRY: fetch metriche social
+0 22 * * *   /Users/whyed/Documents/WhyPost/venv/bin/python3 -m agents.telemetry >> /Users/whyed/Documents/WhyPost/data/logs/telemetry.log 2>&1
+
+# Domenica 09:00 — OPUS: weekly review + proposta aggiornamento regole
+0 9 * * 0    /Users/whyed/Documents/WhyPost/venv/bin/python3 -m agents.opus >> /Users/whyed/Documents/WhyPost/data/logs/opus.log 2>&1
+
+# Domenica 09:30 — CLACK RESEARCH: aggiorna template library
+30 9 * * 0   /Users/whyed/Documents/WhyPost/venv/bin/python3 -m agents.clack_research >> /Users/whyed/Documents/WhyPost/data/logs/clack_research.log 2>&1
+
+# Ogni giorno 10:00 — CLACK DIRECTOR: ricerca autonoma template + tecniche virali
+0 10 * * *   /Users/whyed/Documents/WhyPost/venv/bin/python3 /Users/whyed/Documents/WhyPost/agents/clack_director.py --research >> /Users/whyed/Documents/WhyPost/data/logs/clack_director.log 2>&1

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Play, RefreshCw, Settings2, Sun, Moon } from 'lucide-react';
 import { Statistics } from './Statistics';
@@ -6,8 +6,8 @@ import { Calendar } from './Calendar';
 import { BottomBar } from './BottomBar';
 import { QueuePanel } from './QueuePanel';
 import { StatusBadge } from './StatusBadge';
-import { SocialConnectModal } from './SocialConnectModal';
 import type { SystemState, VideoItem, MemorySummary } from '../types';
+import type { Page } from './Sidebar';
 
 interface Props {
   state: SystemState;
@@ -21,6 +21,7 @@ interface Props {
   pipelineRunning: boolean;
   theme: 'dark' | 'light';
   onToggleTheme: () => void;
+  onNavigate: (p: Page) => void;
 }
 
 function useRelativeTime(date: Date | null): string {
@@ -44,10 +45,9 @@ export function Dashboard({
   state, queue, serverOk,
   onVideoClick, lastRefresh, onRefresh,
   onRunPipeline, pipelineRunning,
-  theme, onToggleTheme,
+  theme, onToggleTheme, onNavigate,
 }: Props) {
-  const refreshLabel   = useRelativeTime(lastRefresh);
-  const [showOpts, setShowOpts] = useState(false);
+  const refreshLabel = useRelativeTime(lastRefresh);
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden' }}>
@@ -101,9 +101,9 @@ export function Dashboard({
             {theme === 'dark' ? <Sun size={13} /> : <Moon size={13} />}
           </motion.button>
 
-          {/* Options button */}
+          {/* Options button → va a Settings */}
           <motion.button
-            onClick={() => setShowOpts(true)}
+            onClick={() => onNavigate('settings')}
             whileHover={{ scale: 1.04, background: 'var(--surf-3)' as never }}
             whileTap={{ scale: 0.93 }}
             transition={{ type: 'spring' as const, stiffness: 500, damping: 30 }}
@@ -195,10 +195,6 @@ export function Dashboard({
         />
       </div>
 
-      {/* ── Options modal ───────────────────────── */}
-      <AnimatePresence>
-        {showOpts && <SocialConnectModal onClose={() => setShowOpts(false)} />}
-      </AnimatePresence>
     </div>
   );
 }

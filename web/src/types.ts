@@ -19,12 +19,14 @@ export interface SystemState {
 
 export interface VideoItem {
   id: string;
-  title: string;
-  status: 'scripted' | 'assets_ready' | 'rendered' | 'ready' | 'published' | 'needs_fix';
-  platform: string[];
-  scheduled_at: string | null;
-  language: string;
+  title?: string;
+  idea_title?: string;
+  status: 'scripted' | 'assets_ready' | 'rendered' | 'ready' | 'published' | 'needs_fix' | 'rendering' | 'render_failed';
+  platform?: string[];
+  scheduled_at?: string | null;
+  language?: string;
   video_type?: string;
+  render_engine?: string;
 }
 
 export interface VideoScript {
