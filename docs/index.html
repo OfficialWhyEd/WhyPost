@@ -1,0 +1,735 @@
+<!DOCTYPE html>
+<!--
+  WhyPost™ · A WhyEd Project
+  © 2026 WhyEd™ — @whyed.music
+  github.com/OfficialWhyEd/WhyPost · MIT License
+-->
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>WhyPost — Autonomous Content Factory</title>
+  <meta name="description" content="10 cron jobs. 5 AI agents. Posts every day to Instagram, TikTok, and YouTube. Zero Anthropic API costs." />
+  <meta name="author" content="WhyEd — @whyed.music" />
+  <meta property="og:title" content="WhyPost™ — Autonomous Content Factory · A WhyEd Project" />
+  <meta property="og:description" content="10 cron jobs. 5 AI agents. Posts every day to Instagram, TikTok, and YouTube. Zero Anthropic API costs." />
+  <meta property="og:image" content="https://raw.githubusercontent.com/OfficialWhyEd/WhyPost/main/assets/banner.png" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:creator" content="@OfficialWhyEd" />
+  <link rel="icon" href="logo.png" />
+  <link rel="preconnect" href="https://api.fontshare.com" />
+  <link href="https://api.fontshare.com/v2/css?f[]=satoshi@900,700,500,400&display=swap" rel="stylesheet" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg:      #07050f;
+      --surface: #0c0a17;
+      --border:  rgba(134,59,255,0.16);
+      --purple:  #863bff;
+      --purp2:   #9b59ff;
+      --text:    #f0eef8;
+      --dim:     #5c5270;
+      --sub:     #9d8fc0;
+      --mono:    'JetBrains Mono', monospace;
+    }
+    html { scroll-behavior: smooth; }
+    body { font-family: 'Satoshi', system-ui, sans-serif; background: var(--bg); color: var(--text); overflow-x: hidden; -webkit-font-smoothing: antialiased; }
+    body::before {
+      content: ''; position: fixed; inset: 0; z-index: 9000; pointer-events: none; opacity: 0.032;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      background-size: 256px 256px;
+    }
+    nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; display: flex; align-items: center; justify-content: space-between; padding: 1.25rem 3rem; background: rgba(7,5,15,0.8); backdrop-filter: blur(20px); border-bottom: 1px solid var(--border); }
+    .nav-logo { display: flex; align-items: center; gap: .75rem; font-size: 1rem; font-weight: 700; letter-spacing: -.02em; color: var(--text); text-decoration: none; }
+    .nav-logo img { height: 26px; }
+    .nav-links { display: flex; align-items: center; gap: 1rem; }
+    .nav-link { font-family: var(--mono); font-size: .72rem; letter-spacing: .08em; text-transform: uppercase; color: var(--dim); text-decoration: none; transition: color .2s; }
+    .nav-link:hover { color: var(--text); }
+    .btn-star { display: inline-flex; align-items: center; gap: .4rem; font-family: 'Satoshi', sans-serif; font-size: .85rem; font-weight: 700; padding: .5rem 1.1rem; border-radius: 6px; background: var(--purple); color: #fff; border: none; cursor: pointer; text-decoration: none; transition: background .2s, transform .1s; }
+    .btn-star:hover { background: var(--purp2); }
+    .hero { min-height: 100dvh; display: grid; grid-template-columns: 1fr 1fr; align-items: center; padding: 8rem 3rem 3rem; gap: 4rem; position: relative; overflow: hidden; }
+    .beams { position: absolute; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; }
+    .beams svg { width: 100%; height: 100%; position: absolute; inset: 0; }
+    @keyframes slideUp { from { opacity: 0; transform: translateY(28px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes fadeIn  { from { opacity: 0; } to { opacity: 1; } }
+    .enter-1 { animation: slideUp .9s cubic-bezier(0.16,1,0.3,1) .05s both; }
+    .enter-2 { animation: slideUp .9s cubic-bezier(0.16,1,0.3,1) .2s both; }
+    .enter-3 { animation: slideUp .9s cubic-bezier(0.16,1,0.3,1) .35s both; }
+    .enter-4 { animation: slideUp .9s cubic-bezier(0.16,1,0.3,1) .5s both; }
+    .enter-5 { animation: fadeIn  .9s cubic-bezier(0.16,1,0.3,1) .65s both; }
+    .hero-text { max-width: 600px; position: relative; z-index: 2; will-change: transform; }
+    .eyebrow { font-family: var(--mono); font-size: .62rem; letter-spacing: .14em; text-transform: uppercase; color: var(--dim); display: flex; gap: 2rem; margin-bottom: 2.25rem; flex-wrap: wrap; }
+    .eyebrow .dot-live { display: inline-block; width: 5px; height: 5px; border-radius: 50%; background: #28c840; margin-right: .4em; animation: blink-live 2.5s ease-in-out infinite; }
+    @keyframes blink-live { 0%,100%{opacity:1} 50%{opacity:.3} }
+    .hero-h1 { font-size: clamp(3.6rem, 7vw, 6.8rem); font-weight: 900; line-height: .93; letter-spacing: -.05em; margin-bottom: .12em; }
+    .hero-h1-b { font-size: clamp(3.6rem, 7vw, 6.8rem); font-weight: 900; line-height: .93; letter-spacing: -.05em; color: var(--sub); margin-bottom: 2rem; }
+    .hero-h1-b em { font-style: italic; color: var(--purple); }
+    .hero-sub { font-size: 1.05rem; line-height: 1.75; color: var(--sub); max-width: 460px; margin-bottom: 2.5rem; }
+    .hero-ctas { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }
+    .coord-bar { position: absolute; bottom: 2.5rem; left: 3rem; right: 3rem; display: flex; justify-content: space-between; align-items: center; z-index: 2; }
+    .coord { font-family: var(--mono); font-size: .58rem; letter-spacing: .14em; text-transform: uppercase; color: var(--dim); }
+    .btn-primary { display: inline-flex; align-items: center; gap: .5rem; font-family: 'Satoshi',sans-serif; font-size: .95rem; font-weight: 700; padding: .75rem 1.75rem; border-radius: 8px; background: var(--purple); color: #fff; border: none; cursor: pointer; text-decoration: none; transition: background .2s, transform .15s, box-shadow .2s; }
+    .btn-primary:hover { background: var(--purp2); transform: translateY(-1px); box-shadow: 0 8px 24px rgba(134,59,255,.3); }
+    .btn-ghost { display: inline-flex; align-items: center; gap: .5rem; font-family: 'Satoshi',sans-serif; font-size: .95rem; font-weight: 600; padding: .75rem 1.5rem; border-radius: 8px; background: transparent; color: var(--sub); border: 1px solid rgba(255,255,255,.1); cursor: pointer; text-decoration: none; transition: border-color .2s, color .2s; }
+    .btn-ghost:hover { border-color: rgba(255,255,255,.25); color: var(--text); }
+    .hero-visual { position: relative; z-index: 2; will-change: transform; }
+    .logo-wrap { display: flex; justify-content: center; align-items: center; position: relative; margin-bottom: 2rem; }
+    .logo-glow { position: absolute; width: 280px; height: 120px; background: radial-gradient(ellipse, rgba(134,59,255,.25) 0%, transparent 70%); animation: breathe 5s ease-in-out infinite; }
+    @keyframes breathe { 0%,100%{transform:scale(1);opacity:.6} 50%{transform:scale(1.1);opacity:1} }
+    .logo-img { width: 100%; max-width: 380px; position: relative; z-index: 1; filter: drop-shadow(0 0 20px rgba(134,59,255,.35)); will-change: transform; border-radius: 10px; }
+    .terminal { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; font-family: var(--mono); font-size: .8rem; box-shadow: 0 24px 48px rgba(0,0,0,.5), inset 0 1px 0 rgba(255,255,255,.04); }
+    .terminal-bar { display: flex; align-items: center; gap: .5rem; padding: .7rem 1rem; background: rgba(255,255,255,.025); border-bottom: 1px solid var(--border); }
+    .dot { width: 10px; height: 10px; border-radius: 50%; }
+    .dot-r{background:#ff5f57;} .dot-y{background:#febc2e;} .dot-g{background:#28c840;}
+    .terminal-title { font-family: 'Satoshi',sans-serif; font-size:.72rem; color: var(--dim); margin-left: auto; letter-spacing:.04em; }
+    .terminal-body { padding: 1.25rem 1.5rem; line-height: 1.85; height: 16rem; overflow: hidden; }
+    .t-purp  { color: var(--purple); }
+    .t-ai    { color: #c8b8e8; }
+    .t-dim   { color: var(--dim); }
+    .t-green { color: #28c840; }
+    .t-line  { margin-bottom: .1rem; }
+    .cursor { display: inline-block; width: 7px; height: 1em; background: var(--purple); vertical-align: text-bottom; animation: blink 1.1s step-end infinite; margin-left: 1px; }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+    section { padding: 7rem 3rem; }
+    .section-label { font-family: var(--mono); font-size: .6rem; font-weight: 400; letter-spacing: .12em; text-transform: uppercase; color: var(--dim); margin-bottom: .85rem; }
+    h2 { font-size: clamp(2rem, 4vw, 3.2rem); font-weight: 900; letter-spacing: -.04em; line-height: 1.05; margin-bottom: 1.25rem; }
+    h2 em { font-style: normal; color: var(--purple); }
+    .lead { font-size: 1rem; line-height: 1.8; color: var(--sub); max-width: 580px; }
+    hr { border: none; border-top: 1px solid var(--border); }
+    code { font-family: var(--mono); font-size: .85em; color: var(--sub); }
+    .screenshot-wrap { margin: 0 3rem 5rem; border: 1px solid var(--border); border-radius: 20px; overflow: hidden; box-shadow: 0 40px 80px rgba(0,0,0,.6), 0 0 0 1px rgba(134,59,255,.08); }
+    .screenshot-wrap img { width: 100%; display: block; }
+    .prompts-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; margin-top: 4rem; }
+    .prompt-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 1.75rem; position: relative; overflow: hidden; transition: border-color .25s, transform .2s; }
+    .prompt-card:hover { border-color: rgba(134,59,255,.4); transform: translateY(-2px); }
+    .prompt-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent, rgba(134,59,255,.35), transparent); }
+    .prompt-category { font-family: var(--mono); font-size: .63rem; font-weight: 500; letter-spacing: .1em; text-transform: uppercase; color: var(--purple); margin-bottom: .9rem; }
+    .prompt-text { font-family: var(--mono); font-size: .8rem; color: #e0d4f8; line-height: 1.6; background: rgba(134,59,255,.06); border: 1px solid rgba(134,59,255,.22); border-radius: 8px; padding: .7rem .9rem; margin-bottom: .9rem; }
+    .prompt-result { font-size: .85rem; color: var(--sub); line-height: 1.65; }
+    .philosophy-grid { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 1.25rem; margin-top: 4rem; }
+    .phil-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 2rem; transition: border-color .25s; }
+    .phil-card:hover { border-color: rgba(134,59,255,.35); }
+    .phil-card.tall { grid-row: span 2; }
+    .phil-number { font-family: var(--mono); font-size: .62rem; letter-spacing: .08em; color: var(--purple); margin-bottom: 1.25rem; }
+    .phil-card h3 { font-size: 1.15rem; font-weight: 700; letter-spacing: -.02em; margin-bottom: .7rem; }
+    .phil-card p { font-size: .88rem; color: var(--sub); line-height: 1.75; }
+    .features-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 0; margin-top: 4rem; border: 1px solid var(--border); border-radius: 16px; overflow: hidden; }
+    .feat { padding: 1.75rem; border-right: 1px solid var(--border); border-bottom: 1px solid var(--border); transition: background .2s; }
+    .feat:hover { background: rgba(134,59,255,.04); }
+    .feat:nth-child(3n) { border-right: none; }
+    .feat:nth-last-child(-n+3) { border-bottom: none; }
+    .feat-icon { font-family: var(--mono); font-size: .62rem; letter-spacing: .08em; color: var(--purple); margin-bottom: .85rem; text-transform: uppercase; }
+    .feat h4 { font-size: .92rem; font-weight: 700; margin-bottom: .35rem; letter-spacing: -.01em; }
+    .feat p { font-size: .82rem; color: var(--sub); line-height: 1.65; }
+    .marquee-wrap { overflow: hidden; position: relative; margin-top: 2.5rem; }
+    .marquee-wrap::before, .marquee-wrap::after { content: ''; position: absolute; top: 0; bottom: 0; width: 5rem; z-index: 2; pointer-events: none; }
+    .marquee-wrap::before { left: 0; background: linear-gradient(to right, var(--bg), transparent); }
+    .marquee-wrap::after  { right: 0; background: linear-gradient(to left, var(--bg), transparent); }
+    .plugins-track { display: flex; gap: 1rem; animation: marquee 36s linear infinite; width: max-content; }
+    .plugins-track:hover { animation-play-state: paused; }
+    @keyframes marquee { 0%{transform:translateX(0)} 100%{transform:translateX(-50%)} }
+    .plugin-badge { display: flex; align-items: center; gap: .55rem; padding: .5rem 1.1rem; background: var(--surface); border: 1px solid var(--border); border-radius: 100px; font-family: 'Satoshi',sans-serif; font-size: .8rem; font-weight: 600; white-space: nowrap; color: var(--sub); transition: border-color .2s, color .2s; }
+    .plugin-badge:hover { border-color: rgba(134,59,255,.4); color: var(--text); }
+    .plugin-dot { width: 6px; height: 6px; border-radius: 50%; }
+    .dot-live2 { background: #28c840; }
+    .dot-wip   { background: #febc2e; }
+    .pipeline-section { padding: 6rem 3rem 5rem; }
+    .pipeline-header { margin-bottom: 4rem; }
+    .pipeline-svg-wrap { max-width: 900px; margin: 0 auto; }
+    .pipeline-svg { width: 100%; height: auto; display: block; }
+    .agent-box        { fill: var(--surface); stroke: var(--border); stroke-width: 1; }
+    .agent-box-active { fill: var(--surface); stroke: rgba(134,59,255,.5); stroke-width: 1.5; animation: purp-pulse 3s ease-in-out infinite; }
+    @keyframes purp-pulse { 0%,100%{stroke-opacity:.5} 50%{stroke-opacity:1} }
+    .svg-label      { fill: var(--sub); font-family: 'JetBrains Mono', monospace; font-size: 11px; }
+    .svg-label-bold { fill: var(--text); font-family: 'Satoshi', sans-serif; font-weight: 700; font-size: 13px; }
+    .svg-label-tiny { fill: var(--dim); font-family: 'JetBrains Mono', monospace; font-size: 9.5px; }
+    .resp-track   { fill: none; stroke: rgba(134,59,255,.45); stroke-width: 1.5; }
+    .flow-dot     { fill: rgba(134,59,255,.75); }
+    .flow-dot-out { fill: var(--purple); }
+    .pipe-stats { display: flex; gap: 0; border: 1px solid var(--border); border-radius: 12px; overflow: hidden; margin-top: 2.5rem; }
+    .pipe-stat { flex: 1; padding: 1.5rem 2rem; border-right: 1px solid var(--border); }
+    .pipe-stat:last-child { border-right: none; }
+    .pipe-num { display: block; font-size: 2.2rem; font-weight: 900; letter-spacing: -.05em; color: var(--text); line-height: 1; }
+    .pipe-unit { font-family: var(--mono); font-size: .62rem; letter-spacing: .06em; text-transform: uppercase; color: var(--dim); margin-top: .3rem; display: block; }
+    .manifesto-section { padding: 8rem 3rem; position: relative; overflow: hidden; }
+    .manifesto-section::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse at 50% 60%, rgba(134,59,255,.07) 0%, transparent 65%); pointer-events: none; }
+    .manifesto-inner { max-width: 860px; margin: 0 auto; }
+    .manifesto-label { font-family: var(--mono); font-size: .62rem; letter-spacing: .14em; text-transform: uppercase; color: var(--purple); margin-bottom: 2.5rem; display: block; }
+    .manifesto-text { font-size: clamp(1.6rem, 3.5vw, 2.6rem); font-weight: 700; line-height: 1.3; letter-spacing: -.03em; color: var(--text); margin-bottom: 2.5rem; }
+    .manifesto-text em { font-style: normal; color: var(--sub); font-weight: 400; }
+    .manifesto-sub { font-size: 1rem; color: var(--sub); line-height: 1.8; max-width: 580px; margin-bottom: 3rem; }
+    .cta-section { padding: 6rem 3rem; display: grid; grid-template-columns: 1fr 1fr; gap: 6rem; align-items: center; }
+    .cta-text h2 { margin-bottom: 1rem; }
+    .cta-text .lead { margin-bottom: 2rem; }
+    .cta-buttons { display: flex; gap: 1rem; flex-wrap: wrap; }
+    .cta-stats { display: flex; flex-direction: column; gap: 2rem; }
+    .stat-item { border-top: 1px solid var(--border); padding-top: 1.5rem; }
+    .stat-num { font-size: 2.8rem; font-weight: 900; letter-spacing: -.05em; color: var(--text); line-height: 1; }
+    .stat-num span { color: var(--purple); }
+    .stat-label { font-family: var(--mono); font-size: .7rem; letter-spacing: .06em; text-transform: uppercase; color: var(--dim); margin-top: .35rem; }
+    footer { padding: 2.5rem 3rem; border-top: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+    .footer-left { font-family: var(--mono); font-size: .62rem; letter-spacing: .08em; text-transform: uppercase; color: var(--dim); }
+    .footer-left a { color: var(--purple); text-decoration: none; }
+    .footer-links { display: flex; gap: 1.5rem; }
+    .footer-link { font-family: var(--mono); font-size: .62rem; letter-spacing: .08em; text-transform: uppercase; color: var(--dim); text-decoration: none; transition: color .2s; }
+    .footer-link:hover { color: var(--text); }
+    .reveal { opacity: 0; transform: translateY(22px); transition: opacity .7s cubic-bezier(0.16,1,0.3,1), transform .7s cubic-bezier(0.16,1,0.3,1); }
+    .reveal.visible { opacity: 1; transform: translateY(0); }
+    .reveal-d1 { transition-delay: .1s; }
+    .reveal-d2 { transition-delay: .2s; }
+    .reveal-d3 { transition-delay: .3s; }
+    .prompts-grid .prompt-card { opacity: 0; transform: translateY(18px); transition: opacity .6s cubic-bezier(0.16,1,0.3,1), transform .6s cubic-bezier(0.16,1,0.3,1); }
+    .prompts-grid.stagger-go .prompt-card:nth-child(1) { opacity:1; transform:none; transition-delay:.04s; }
+    .prompts-grid.stagger-go .prompt-card:nth-child(2) { opacity:1; transform:none; transition-delay:.12s; }
+    .prompts-grid.stagger-go .prompt-card:nth-child(3) { opacity:1; transform:none; transition-delay:.20s; }
+    .prompts-grid.stagger-go .prompt-card:nth-child(4) { opacity:1; transform:none; transition-delay:.28s; }
+    .prompts-grid.stagger-go .prompt-card:nth-child(5) { opacity:1; transform:none; transition-delay:.36s; }
+    .prompts-grid.stagger-go .prompt-card:nth-child(6) { opacity:1; transform:none; transition-delay:.44s; }
+    .philosophy-grid .phil-card { opacity: 0; transform: translateY(18px); transition: opacity .6s cubic-bezier(0.16,1,0.3,1), transform .6s cubic-bezier(0.16,1,0.3,1); }
+    .philosophy-grid.stagger-go .phil-card:nth-child(1) { opacity:1; transform:none; transition-delay:.04s; }
+    .philosophy-grid.stagger-go .phil-card:nth-child(2) { opacity:1; transform:none; transition-delay:.12s; }
+    .philosophy-grid.stagger-go .phil-card:nth-child(3) { opacity:1; transform:none; transition-delay:.20s; }
+    .philosophy-grid.stagger-go .phil-card:nth-child(4) { opacity:1; transform:none; transition-delay:.28s; }
+    .philosophy-grid.stagger-go .phil-card:nth-child(5) { opacity:1; transform:none; transition-delay:.36s; }
+    .features-grid .feat { opacity: 0; transform: translateY(18px); transition: opacity .6s cubic-bezier(0.16,1,0.3,1), transform .6s cubic-bezier(0.16,1,0.3,1); }
+    .features-grid.stagger-go .feat:nth-child(1) { opacity:1; transform:none; transition-delay:.04s; }
+    .features-grid.stagger-go .feat:nth-child(2) { opacity:1; transform:none; transition-delay:.12s; }
+    .features-grid.stagger-go .feat:nth-child(3) { opacity:1; transform:none; transition-delay:.20s; }
+    .features-grid.stagger-go .feat:nth-child(4) { opacity:1; transform:none; transition-delay:.28s; }
+    .features-grid.stagger-go .feat:nth-child(5) { opacity:1; transform:none; transition-delay:.36s; }
+    .features-grid.stagger-go .feat:nth-child(6) { opacity:1; transform:none; transition-delay:.44s; }
+    .pipe-stats .pipe-stat { opacity: 0; transform: translateY(14px); transition: opacity .55s cubic-bezier(0.16,1,0.3,1), transform .55s cubic-bezier(0.16,1,0.3,1); }
+    .pipe-stats.stagger-go .pipe-stat:nth-child(1) { opacity:1; transform:none; transition-delay:.05s; }
+    .pipe-stats.stagger-go .pipe-stat:nth-child(2) { opacity:1; transform:none; transition-delay:.13s; }
+    .pipe-stats.stagger-go .pipe-stat:nth-child(3) { opacity:1; transform:none; transition-delay:.21s; }
+    .pipe-stats.stagger-go .pipe-stat:nth-child(4) { opacity:1; transform:none; transition-delay:.29s; }
+    @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; } }
+    @media (max-width: 768px) {
+      nav { padding: .9rem 1.25rem; }
+      .nav-links .nav-link { display: none; }
+      .star-text { display: none; }
+      .btn-star { padding: .5rem .7rem; }
+      .hero { grid-template-columns: 1fr; padding: 5rem 1.5rem 5rem; gap: 2rem; min-height: unset; }
+      .hero-visual { order: -1; }
+      .coord-bar { display: none; }
+      .eyebrow { gap: 1rem; margin-bottom: 1.75rem; }
+      .hero-h1 { font-size: 2.8rem; line-height: .95; }
+      .hero-h1-b { font-size: 2.8rem; line-height: .95; }
+      .hero-sub { font-size: .9rem; margin-bottom: 2rem; }
+      .terminal-body { height: 13rem; font-size: .75rem; padding: 1rem 1.1rem; }
+      section { padding: 4rem 1.5rem; }
+      .screenshot-wrap { margin: 0 1.25rem 2.5rem; border-radius: 12px; }
+      .pipeline-section { padding: 3.5rem 1.5rem 2.5rem; }
+      .pipeline-svg { display: none; }
+      .pipe-stats { flex-direction: column; }
+      .pipe-stat { border-right: none; border-bottom: 1px solid var(--border); padding: 1.1rem 1.25rem; }
+      .pipe-stat:last-child { border-bottom: none; }
+      .pipe-num { font-size: 1.8rem; }
+      .prompts-grid { grid-template-columns: 1fr; gap: 1rem; margin-top: 2.5rem; }
+      .prompt-card { padding: 1.25rem; }
+      .philosophy-grid { grid-template-columns: 1fr; gap: 1rem; }
+      .phil-card.tall { grid-row: span 1; }
+      .phil-card { padding: 1.5rem; }
+      .features-grid { grid-template-columns: 1fr; border-radius: 12px; }
+      .feat:nth-child(n) { border-right: none; border-bottom: 1px solid var(--border); }
+      .feat:last-child { border-bottom: none; }
+      .manifesto-section { padding: 4rem 1.5rem; }
+      .manifesto-text { font-size: 1.5rem; }
+      .cta-section { grid-template-columns: 1fr; padding: 4rem 1.5rem; gap: 3rem; }
+      .stat-num { font-size: 2.2rem; }
+      footer { flex-direction: column; gap: 1rem; text-align: center; padding: 2rem 1.5rem; }
+      .footer-links { justify-content: center; flex-wrap: wrap; gap: 1rem; }
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-logo" href="#">
+    <img src="logo.png" alt="WhyPost" />
+    WhyPost<span style="font-family:'JetBrains Mono',monospace;font-size:.58rem;font-weight:400;letter-spacing:.08em;color:var(--dim);margin-left:.6rem;padding:.15em .5em;border:1px solid rgba(255,255,255,0.07);border-radius:3px;">by WhyEd</span>
+  </a>
+  <div class="nav-links">
+    <a class="nav-link" href="https://discord.gg/cQQckfnN">Discord</a>
+    <a class="nav-link" href="https://instagram.com/whyed.music">Instagram</a>
+    <a class="nav-link" href="https://github.com/OfficialWhyEd/WhyPost">GitHub</a>
+    <a class="btn-star" href="https://github.com/OfficialWhyEd/WhyPost">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+      <span class="star-text">Star on GitHub</span>
+    </a>
+  </div>
+</nav>
+
+<section class="hero">
+  <div class="beams" aria-hidden="true">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 800" preserveAspectRatio="xMidYMid slice">
+      <defs>
+        <linearGradient id="bg0" gradientUnits="userSpaceOnUse" x1="500" y1="800" x2="-200" y2="0"><stop offset="0%" stop-color="rgba(255,255,255,0)"/><stop offset="100%" stop-color="rgba(255,255,255,0.016)"/></linearGradient>
+        <linearGradient id="bg1" gradientUnits="userSpaceOnUse" x1="500" y1="800" x2="300" y2="0"><stop offset="0%" stop-color="rgba(255,255,255,0)"/><stop offset="100%" stop-color="rgba(255,255,255,0.016)"/></linearGradient>
+        <linearGradient id="bg2" gradientUnits="userSpaceOnUse" x1="500" y1="800" x2="600" y2="0"><stop offset="0%" stop-color="rgba(255,255,255,0)"/><stop offset="100%" stop-color="rgba(255,255,255,0.016)"/></linearGradient>
+        <linearGradient id="bg3" gradientUnits="userSpaceOnUse" x1="500" y1="800" x2="900" y2="0"><stop offset="0%" stop-color="rgba(255,255,255,0)"/><stop offset="100%" stop-color="rgba(255,255,255,0.016)"/></linearGradient>
+        <linearGradient id="anim0" gradientUnits="userSpaceOnUse" x1="500" y1="800" x2="-200" y2="0"><stop offset="0%" stop-color="rgba(134,59,255,0)"/><stop offset="50%" stop-color="rgba(134,59,255,0.18)"/><stop offset="100%" stop-color="rgba(240,237,248,0)"/></linearGradient>
+        <linearGradient id="anim1" gradientUnits="userSpaceOnUse" x1="500" y1="800" x2="300" y2="0"><stop offset="0%" stop-color="rgba(134,59,255,0)"/><stop offset="50%" stop-color="rgba(134,59,255,0.18)"/><stop offset="100%" stop-color="rgba(240,237,248,0)"/></linearGradient>
+        <linearGradient id="anim2" gradientUnits="userSpaceOnUse" x1="500" y1="800" x2="600" y2="0"><stop offset="0%" stop-color="rgba(134,59,255,0)"/><stop offset="50%" stop-color="rgba(134,59,255,0.18)"/><stop offset="100%" stop-color="rgba(240,237,248,0)"/></linearGradient>
+        <linearGradient id="anim3" gradientUnits="userSpaceOnUse" x1="500" y1="800" x2="900" y2="0"><stop offset="0%" stop-color="rgba(134,59,255,0)"/><stop offset="50%" stop-color="rgba(134,59,255,0.18)"/><stop offset="100%" stop-color="rgba(240,237,248,0)"/></linearGradient>
+      </defs>
+      <path d="M500,800 L-200,0" stroke="url(#bg0)" stroke-width="0.6" fill="none"/>
+      <path d="M500,800 L300,0"  stroke="url(#bg1)" stroke-width="0.6" fill="none"/>
+      <path d="M500,800 L600,0"  stroke="url(#bg2)" stroke-width="0.6" fill="none"/>
+      <path d="M500,800 L900,0"  stroke="url(#bg3)" stroke-width="0.6" fill="none"/>
+      <path d="M500,800 L-200,0" stroke="url(#anim0)" stroke-width="1.2" fill="none" stroke-dasharray="260 1000" stroke-dashoffset="1000" style="animation:beam-travel 6s 0s ease-in-out infinite"/>
+      <path d="M500,800 L300,0"  stroke="url(#anim1)" stroke-width="1.2" fill="none" stroke-dasharray="260 1000" stroke-dashoffset="1000" style="animation:beam-travel 6s 1.4s ease-in-out infinite"/>
+      <path d="M500,800 L600,0"  stroke="url(#anim2)" stroke-width="1.2" fill="none" stroke-dasharray="260 1000" stroke-dashoffset="1000" style="animation:beam-travel 6s 2.8s ease-in-out infinite"/>
+      <path d="M500,800 L900,0"  stroke="url(#anim3)" stroke-width="1.2" fill="none" stroke-dasharray="260 1000" stroke-dashoffset="1000" style="animation:beam-travel 6s 4.2s ease-in-out infinite"/>
+    </svg>
+    <style>@keyframes beam-travel { 0%{stroke-dashoffset:1000;opacity:0} 10%{opacity:1} 70%{stroke-dashoffset:-400;opacity:.8} 100%{stroke-dashoffset:-800;opacity:0} }</style>
+  </div>
+
+  <div class="hero-text" id="hero-text">
+    <div class="eyebrow enter-1">
+      <span><span class="dot-live"></span>Running &middot; 10 cron jobs active</span>
+      <span style="background:rgba(134,59,255,0.18);border:1px solid rgba(134,59,255,0.4);border-radius:3px;padding:.1em .5em;font-size:.6rem;letter-spacing:.1em;color:var(--purple);">LIVE</span>
+    </div>
+    <h1 class="hero-h1 enter-2">Autonomous.</h1>
+    <h1 class="hero-h1-b enter-3">Content. <em>Daily.</em></h1>
+    <p class="hero-sub enter-4">10 cron jobs. 5 AI agents. Posts every day to Instagram, TikTok, and YouTube. Zero Anthropic API costs.</p>
+    <div class="hero-ctas enter-5">
+      <a class="btn-primary" href="https://github.com/OfficialWhyEd/WhyPost">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+        Star on GitHub
+      </a>
+      <a class="btn-ghost" href="https://discord.gg/cQQckfnN">Join Discord</a>
+      <a class="btn-ghost" href="https://instagram.com/whyed.music">Instagram</a>
+    </div>
+  </div>
+
+  <div class="hero-visual enter-3" id="hero-visual">
+    <div class="logo-wrap">
+      <div class="logo-glow"></div>
+      <img class="logo-img" src="logo.png" alt="WhyPost" id="hero-logo" />
+    </div>
+    <div class="terminal">
+      <div class="terminal-bar">
+        <div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div>
+        <span class="terminal-title">WhyPost &middot; pipeline &middot; 09:00:00</span>
+      </div>
+      <div class="terminal-body" id="tw-body"></div>
+    </div>
+  </div>
+
+  <div class="coord-bar">
+    <span class="coord"><span style="color:var(--purple)">//</span> Python &middot; Flask &middot; React &middot; Remotion &middot; FFmpeg</span>
+    <span class="coord">Instagram &middot; TikTok &middot; YouTube &middot; Claude Pro CLI &middot; Gemini Flash &middot; Groq</span>
+    <span class="coord">scroll</span>
+  </div>
+</section>
+
+<div class="screenshot-wrap reveal">
+  <img src="screenshot.png" alt="WhyPost Mission Control Dashboard" loading="lazy" />
+</div>
+
+<section class="pipeline-section reveal">
+  <div class="pipeline-header">
+    <p class="section-label">How it works</p>
+    <h2>Five agents.<br/><em>One pipeline.</em></h2>
+    <p class="lead">Every morning, the cron fires. Reddit gets mined. Scripts get written. Videos get rendered. Posts go live. You wake up to done.</p>
+  </div>
+  <div class="pipeline-svg-wrap">
+    <svg class="pipeline-svg" viewBox="0 0 900 200" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <path id="f1" d="M 144,100 L 196,100"/>
+        <path id="f2" d="M 324,100 L 376,100"/>
+        <path id="f3" d="M 504,100 L 556,100"/>
+        <path id="f4" d="M 684,100 L 736,100"/>
+      </defs>
+      <rect class="agent-box" x="10" y="60" width="134" height="80" rx="10"/>
+      <text class="svg-label-tiny" x="22" y="80">01 // IDEA</text>
+      <text class="svg-label-bold" x="22" y="100">EXEL</text>
+      <text class="svg-label" x="22" y="118">Reddit mining</text>
+      <text class="svg-label-tiny" x="22" y="132">trend scoring</text>
+      <line class="resp-track" x1="144" y1="100" x2="196" y2="100"/>
+      <line class="resp-track" x1="324" y1="100" x2="376" y2="100"/>
+      <line class="resp-track" x1="504" y1="100" x2="556" y2="100"/>
+      <line class="resp-track" x1="684" y1="100" x2="736" y2="100"/>
+      <rect class="agent-box-active" x="196" y="42" width="128" height="116" rx="10"/>
+      <text class="svg-label-tiny" x="208" y="62">02 // WRITE</text>
+      <text class="svg-label-bold" x="208" y="82">Script</text>
+      <text class="svg-label-bold" x="208" y="98">Writer</text>
+      <text class="svg-label" x="208" y="116">Claude Pro CLI</text>
+      <text class="svg-label-tiny" x="208" y="132">47s &middot; 3 hooks</text>
+      <text class="svg-label-tiny" x="208" y="148">Groq fallback</text>
+      <rect class="agent-box" x="376" y="60" width="128" height="80" rx="10"/>
+      <text class="svg-label-tiny" x="388" y="80">03 // VIDEO</text>
+      <text class="svg-label-bold" x="388" y="100">CLACK</text>
+      <text class="svg-label" x="388" y="118">Remotion + FFmpeg</text>
+      <text class="svg-label-tiny" x="388" y="132">karaoke captions</text>
+      <rect class="agent-box" x="556" y="60" width="128" height="80" rx="10"/>
+      <text class="svg-label-tiny" x="568" y="80">04 // PUBLISH</text>
+      <text class="svg-label-bold" x="568" y="100">Publisher</text>
+      <text class="svg-label" x="568" y="118">IG &middot; TikTok &middot; YT</text>
+      <text class="svg-label-tiny" x="568" y="132">quality gate 94%</text>
+      <rect class="agent-box" x="736" y="60" width="134" height="80" rx="10"/>
+      <text class="svg-label-tiny" x="748" y="80">05 // PLAN</text>
+      <text class="svg-label-bold" x="748" y="100">Calendar</text>
+      <text class="svg-label" x="748" y="118">queue manager</text>
+      <text class="svg-label-tiny" x="748" y="132">weekly scheduling</text>
+      <circle class="flow-dot" r="5"><animateMotion dur="2.8s" repeatCount="indefinite" begin="0s"><mpath href="#f1"/></animateMotion></circle>
+      <circle class="flow-dot" r="5"><animateMotion dur="2.8s" repeatCount="indefinite" begin=".7s"><mpath href="#f2"/></animateMotion></circle>
+      <circle class="flow-dot-out" r="5"><animateMotion dur="2.8s" repeatCount="indefinite" begin="1.4s"><mpath href="#f3"/></animateMotion></circle>
+      <circle class="flow-dot-out" r="5"><animateMotion dur="2.8s" repeatCount="indefinite" begin="2.1s"><mpath href="#f4"/></animateMotion></circle>
+    </svg>
+    <div class="pipe-stats">
+      <div class="pipe-stat"><span class="pipe-num">10</span><span class="pipe-unit">cron jobs &mdash; fires every morning</span></div>
+      <div class="pipe-stat"><span class="pipe-num">5</span><span class="pipe-unit">specialized AI agents</span></div>
+      <div class="pipe-stat"><span class="pipe-num">3</span><span class="pipe-unit">platforms &mdash; IG &middot; TikTok &middot; YouTube</span></div>
+      <div class="pipe-stat"><span class="pipe-num">$0</span><span class="pipe-unit">Anthropic API costs &mdash; Claude Pro CLI</span></div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <p class="section-label reveal">Pipeline cards</p>
+  <h2 class="reveal reveal-d1">Every morning.<br/><em>Every platform.</em></h2>
+  <p class="lead reveal reveal-d2">These are the actual log messages WhyPost produces when it runs. No human involved &mdash; from Reddit to published post in under 4 minutes.</p>
+  <div class="prompts-grid">
+    <div class="prompt-card">
+      <div class="prompt-category">EXEL &middot; Idea Engine</div>
+      <div class="prompt-text">EXEL: Found viral topic from r/ItalianFood (12k upvotes)</div>
+      <div class="prompt-result">Reddit crawler identified top post from the past 24 hours. Trend score computed. Topic queued for script generation with engagement metadata attached.</div>
+    </div>
+    <div class="prompt-card">
+      <div class="prompt-category">Script Writer &middot; Claude Pro CLI</div>
+      <div class="prompt-text">Script Writer: 47-second script, 3 hooks identified</div>
+      <div class="prompt-result">Claude Pro CLI &mdash; not the API, the existing subscription &mdash; writes a platform-optimized script. Hook density analyzed. B-roll cues inserted. Zero cost.</div>
+    </div>
+    <div class="prompt-card">
+      <div class="prompt-category">CLACK Director &middot; Remotion</div>
+      <div class="prompt-text">CLACK Director: Rendering karaoke video, 120fps</div>
+      <div class="prompt-result">Remotion renders frame-perfect karaoke captions synced to the millisecond. FFmpeg encodes for each platform spec. Aspect ratios, bitrates, audio loudness &mdash; all automatic.</div>
+    </div>
+    <div class="prompt-card">
+      <div class="prompt-category">Publisher &middot; Multi-platform</div>
+      <div class="prompt-text">Publisher: Uploaded to Instagram @channel &mdash; 94% quality</div>
+      <div class="prompt-result">Quality gate passed. Post published to Instagram with caption, hashtags, and alt text. TikTok and YouTube Shorts follow within seconds. All three platforms, one pipeline run.</div>
+    </div>
+    <div class="prompt-card">
+      <div class="prompt-category">Calendar Agent &middot; Queue</div>
+      <div class="prompt-text">Calendar Agent: Queue for Monday: 3 videos ready</div>
+      <div class="prompt-result">Week planned. Three topics sourced, scripted, and rendered. Monday through Wednesday covered. Calendar agent manages publish times, spacing, and platform-specific best hours.</div>
+    </div>
+    <div class="prompt-card">
+      <div class="prompt-category">Memory &middot; Performance tracking</div>
+      <div class="prompt-text">Memory: Topic "cornetto coleottero" performed +340% above baseline</div>
+      <div class="prompt-result">Performance logged. Topic category weighted higher for future runs. Trend memory accumulates across every post &mdash; the system gets better at picking viral ideas over time.</div>
+    </div>
+  </div>
+</section>
+
+<hr />
+
+<section>
+  <p class="section-label reveal">Philosophy</p>
+  <h2 class="reveal reveal-d1">Built around one idea:<br/><em>automation has no limits.</em></h2>
+  <div class="philosophy-grid">
+    <div class="phil-card tall">
+      <div class="phil-number">01 // ZERO COST</div>
+      <h3>Claude Pro CLI instead of the API</h3>
+      <p>Most automation tools bill you per token. WhyPost uses Claude Code CLI &mdash; the same subscription you already have &mdash; as a subprocess. No API key. No extra dollar. The same intelligence, zero marginal cost.</p>
+      <br/>
+      <p>This is the core insight: a Claude Pro subscription at $20/month can power an entire content factory if you know how to use it headlessly.</p>
+    </div>
+    <div class="phil-card">
+      <div class="phil-number">02 // DAILY AUTOPILOT</div>
+      <h3>10 cron jobs that just run</h3>
+      <p>No dashboard to open. No run button to click. Every morning, crontab fires. The pipeline executes. Posts go live. You check your analytics after the fact.</p>
+    </div>
+    <div class="phil-card">
+      <div class="phil-number">03 // MULTI-PLATFORM</div>
+      <h3>One script, three formats</h3>
+      <p>A single script becomes a vertical Instagram Story, a YouTube Short, and a TikTok &mdash; each optimized for that platform's algorithm, aspect ratio, and caption format.</p>
+    </div>
+    <div class="phil-card">
+      <div class="phil-number">04 // KARAOKE ENGINE</div>
+      <h3>Frame-perfect captions</h3>
+      <p>Remotion renders word-by-word karaoke captions synced to the millisecond. Not burned-in subtitles &mdash; proper motion-graphics captions that match the audio beat for beat.</p>
+    </div>
+    <div class="phil-card">
+      <div class="phil-number">05 // AI ORCHESTRATION</div>
+      <h3>Agents, not monoliths</h3>
+      <p>Five separate agents, each specialized, each independent. EXEL mines ideas. Script Writer writes. CLACK renders. Publisher posts. Calendar plans. Each one upgradeable without touching the others.</p>
+    </div>
+  </div>
+</section>
+
+<hr />
+
+<section>
+  <p class="section-label reveal">Under the hood</p>
+  <h2 class="reveal reveal-d1">Local first.<br/><em>Zero cloud dependency.</em></h2>
+  <div class="features-grid reveal reveal-d2">
+    <div class="feat">
+      <div class="feat-icon">01 // SCHEDULING</div>
+      <h4>10 cron jobs, macOS native</h4>
+      <p>crontab handles all scheduling. No external job runner, no cloud scheduler. Fires at 9am, runs the pipeline, exits. Repeats tomorrow without you doing anything.</p>
+    </div>
+    <div class="feat">
+      <div class="feat-icon">02 // AI</div>
+      <h4>Claude + Gemini + Groq</h4>
+      <p>Claude Pro CLI for scripting. Gemini Flash for analysis. Groq for low-latency tasks. Three providers, each used where it performs best. None billed per token.</p>
+    </div>
+    <div class="feat">
+      <div class="feat-icon">03 // VIDEO</div>
+      <h4>Remotion + FFmpeg pipeline</h4>
+      <p>Remotion renders React components to video. FFmpeg encodes for each platform spec. Karaoke captions synced via word-level timestamps extracted from the script.</p>
+    </div>
+    <div class="feat">
+      <div class="feat-icon">04 // BACKEND</div>
+      <h4>Python + Flask on :5174</h4>
+      <p>Lightweight Flask API bridges agents and frontend. SQLite stores post history and performance data. JSON queue manages the pending pipeline items locally.</p>
+    </div>
+    <div class="feat">
+      <div class="feat-icon">05 // FRONTEND</div>
+      <h4>Mission Control &mdash; 7 pages</h4>
+      <p>React + Vite dashboard with real-time pipeline status, post queue, performance analytics, agent logs, and manual override controls for every part of the system.</p>
+    </div>
+    <div class="feat">
+      <div class="feat-icon">06 // STORAGE</div>
+      <h4>SQLite + JSON queue</h4>
+      <p>No cloud database. Local SQLite for post history and performance memory. JSON queue for the pipeline backlog. Everything stays on your machine, permanently.</p>
+    </div>
+  </div>
+</section>
+
+<hr />
+
+<section style="padding:5rem 3rem;">
+  <p class="section-label reveal">Integrated with everything</p>
+  <p class="lead reveal reveal-d1">One pipeline run publishes to three platforms, each with platform-specific optimization.</p>
+  <div class="marquee-wrap">
+    <div class="plugins-track">
+      <span class="plugin-badge"><span class="plugin-dot dot-live2"></span>Instagram Reels</span>
+      <span class="plugin-badge"><span class="plugin-dot dot-live2"></span>TikTok</span>
+      <span class="plugin-badge"><span class="plugin-dot dot-live2"></span>YouTube Shorts</span>
+      <span class="plugin-badge"><span class="plugin-dot dot-live2"></span>Claude Pro CLI</span>
+      <span class="plugin-badge"><span class="plugin-dot dot-live2"></span>Gemini Flash</span>
+      <span class="plugin-badge"><span class="plugin-dot dot-live2"></span>Groq</span>
+      <span class="plugin-badge"><span class="plugin-dot dot-live2"></span>Remotion</span>
+      <span class="plugin-badge"><span class="plugin-dot dot-live2"></span>FFmpeg</span>
+      <span class="plugin-badge"><span class="plugin-dot dot-live2"></span>Pexels B-roll</span>
+      <span class="plugin-badge"><span class="plugin-dot dot-wip"></span>Pixabay fallback</span>
+      <span class="plugin-badge"><span class="plugin-dot dot-live2"></span>Reddit API</span>
+      <span class="plugin-badge"><span class="plugin-dot dot-live2"></span>Flask :5174</span>
+      <span class="plugin-badge"><span class="plugin-dot dot-live2"></span>React + Vite</span>
+      <span class="plugin-badge"><span class="plugin-dot dot-live2"></span>SQLite</span>
+      <span class="plugin-badge"><span class="plugin-dot dot-live2"></span>crontab macOS</span>
+      <span class="plugin-badge"><span class="plugin-dot dot-live2"></span>Instagram Reels</span>
+      <span class="plugin-badge"><span class="plugin-dot dot-live2"></span>TikTok</span>
+      <span class="plugin-badge"><span class="plugin-dot dot-live2"></span>YouTube Shorts</span>
+      <span class="plugin-badge"><span class="plugin-dot dot-live2"></span>Claude Pro CLI</span>
+      <span class="plugin-badge"><span class="plugin-dot dot-live2"></span>Gemini Flash</span>
+      <span class="plugin-badge"><span class="plugin-dot dot-live2"></span>Groq</span>
+      <span class="plugin-badge"><span class="plugin-dot dot-live2"></span>Remotion</span>
+      <span class="plugin-badge"><span class="plugin-dot dot-live2"></span>FFmpeg</span>
+      <span class="plugin-badge"><span class="plugin-dot dot-live2"></span>Pexels B-roll</span>
+      <span class="plugin-badge"><span class="plugin-dot dot-wip"></span>Pixabay fallback</span>
+      <span class="plugin-badge"><span class="plugin-dot dot-live2"></span>Reddit API</span>
+      <span class="plugin-badge"><span class="plugin-dot dot-live2"></span>Flask :5174</span>
+      <span class="plugin-badge"><span class="plugin-dot dot-live2"></span>React + Vite</span>
+      <span class="plugin-badge"><span class="plugin-dot dot-live2"></span>SQLite</span>
+      <span class="plugin-badge"><span class="plugin-dot dot-live2"></span>crontab macOS</span>
+    </div>
+  </div>
+  <div style="display:flex;gap:2rem;margin-top:1.25rem;">
+    <span style="font-family:var(--mono);font-size:.6rem;letter-spacing:.08em;text-transform:uppercase;color:var(--dim);"><span style="color:#28c840">&#9679;</span> Active in production</span>
+    <span style="font-family:var(--mono);font-size:.6rem;letter-spacing:.08em;text-transform:uppercase;color:var(--dim);"><span style="color:#febc2e">&#9679;</span> Fallback mode</span>
+  </div>
+</section>
+
+<section class="manifesto-section">
+  <div class="manifesto-inner">
+    <span class="manifesto-label reveal">// Mission</span>
+    <p class="manifesto-text reveal reveal-d1">
+      Most content creators are the bottleneck.<br/>
+      <em>This system removes the bottleneck entirely.</em>
+    </p>
+    <p class="manifesto-sub reveal reveal-d2">
+      WhyPost is for the creator who has ideas but not time. For the developer who wants to build an audience without becoming a full-time video editor. For the indie maker who can code but can't afford a content team.<br/><br/>
+      The insight is simple: Claude Pro already costs $20 a month. If you use it headlessly through the CLI, it becomes a free AI backend for any automation you can imagine. WhyPost is what happens when you take that idea seriously.<br/><br/>
+      <strong style="color:var(--text);font-weight:700;">Every day, without you doing anything, your channels grow.</strong>
+    </p>
+    <div class="hero-ctas reveal reveal-d3">
+      <a class="btn-primary" href="https://github.com/OfficialWhyEd/WhyPost">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+        Star on GitHub
+      </a>
+      <a class="btn-ghost" href="https://discord.gg/cQQckfnN">Join Discord</a>
+      <a class="btn-ghost" href="https://instagram.com/whyed.music">Instagram</a>
+    </div>
+  </div>
+</section>
+
+<section class="cta-section">
+  <div class="cta-text">
+    <p class="section-label reveal">Get started</p>
+    <h2 class="reveal reveal-d1">Clone. Configure.<br/><em>Let it run.</em></h2>
+    <p class="lead reveal reveal-d2">Clone the repo, drop in your API tokens for IG/TikTok/YouTube, run <code>setup_cron.sh</code>, and walk away. The system takes it from there every morning.</p>
+    <div class="cta-buttons reveal reveal-d3">
+      <a class="btn-primary" href="https://github.com/OfficialWhyEd/WhyPost">View on GitHub</a>
+      <a class="btn-ghost" href="https://discord.gg/cQQckfnN">Discord</a>
+    </div>
+  </div>
+  <div class="cta-stats reveal reveal-d2">
+    <div class="stat-item">
+      <div class="stat-num">10<span>+</span></div>
+      <div class="stat-label">Cron jobs firing every morning</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num">5</div>
+      <div class="stat-label">Specialized agents &mdash; each independent</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num">3</div>
+      <div class="stat-label">Platforms &mdash; Instagram, TikTok, YouTube</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num">$0<span> API</span></div>
+      <div class="stat-label">Anthropic costs &mdash; Claude Pro CLI only</div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="footer-left">
+    <span style="font-weight:700;color:var(--text);">WhyPost&#x2122;</span>
+    <span style="color:var(--dim);margin:0 .5rem;">&middot;</span>
+    <span style="font-family:'JetBrains Mono',monospace;font-size:.7rem;color:var(--dim);">A WhyEd&#x2122; Project</span>
+    <span style="color:var(--dim);margin:0 .5rem;">&middot;</span>
+    &copy; 2026 <a href="https://instagram.com/whyed.music">@whyed</a>
+    <span style="color:var(--dim);margin:0 .5rem;">&middot;</span>
+    MIT License
+  </div>
+  <div class="footer-links">
+    <a class="footer-link" href="https://github.com/OfficialWhyEd/WhyPost">GitHub</a>
+    <a class="footer-link" href="https://discord.gg/cQQckfnN">Discord</a>
+    <a class="footer-link" href="https://instagram.com/whyed.music">Instagram</a>
+    <a class="footer-link" href="https://x.com/OfficialWhyEd">X</a>
+  </div>
+</footer>
+
+<script>
+  const heroText   = document.getElementById('hero-text');
+  const heroVisual = document.getElementById('hero-visual');
+  const heroLogo   = document.getElementById('hero-logo');
+  if (window.innerWidth > 768) {
+    document.addEventListener('mousemove', e => {
+      const x = (e.clientX / window.innerWidth  - 0.5) * 18;
+      const y = (e.clientY / window.innerHeight - 0.5) * 10;
+      if (heroText)   heroText.style.transform   = 'translate('+(-x*0.3)+'px,'+(-y*0.3)+'px)';
+      if (heroVisual) heroVisual.style.transform = 'translate('+(x*0.25)+'px,'+(y*0.25)+'px)';
+      if (heroLogo)   heroLogo.style.transform   = 'translate('+(x*0.15)+'px,'+(y*0.15)+'px)';
+    });
+  }
+
+  const revealIo = new IntersectionObserver(entries => {
+    entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); revealIo.unobserve(e.target); } });
+  }, { threshold: 0.07 });
+  document.querySelectorAll('.reveal').forEach(el => revealIo.observe(el));
+  document.querySelectorAll('.screenshot-wrap').forEach(el => el.classList.add('visible'));
+
+  const staggerTargets = ['.prompts-grid', '.philosophy-grid', '.features-grid', '.pipe-stats'];
+  const staggerIo = new IntersectionObserver(entries => {
+    entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('stagger-go'); staggerIo.unobserve(e.target); } });
+  }, { threshold: 0.08 });
+  staggerTargets.forEach(sel => { const el = document.querySelector(sel); if (el) staggerIo.observe(el); });
+
+  const twBody = document.getElementById('tw-body');
+  if (twBody) {
+    const scenes = [
+      [
+        { cls:'t-dim',   text:'# 09:00:00 · pipeline starting · 10 cron jobs active' },
+        { blank: true },
+        { cls:'t-purp',  text:'[EXEL] scanning r/ItalianFood · r/Cooking · r/italy' },
+        { cls:'t-green', text:'[EXEL] found: "cornetto al coleottero" · 12k upvotes' },
+        { cls:'t-dim',   text:'[EXEL] trend score: 94 · queuing for script writer' },
+        { cls:'t-purp',  text:'[SCRIPT] claude --print "write 47s script for TikTok"' },
+        { cls:'t-ai',    text:'[SCRIPT] 3 hooks identified · 47s · B-roll cues: 8' },
+        { cls:'t-dim',   text:'[CLACK] rendering video at 120fps · karaoke synced' },
+        { blank: true },
+        { cls:'t-purp',  prompt:'[PUB] ', after:'instagram upload complete · 94% quality', cursor: true },
+      ],
+      [
+        { cls:'t-dim',   text:'# 09:04:12 · publisher running · 3 platforms' },
+        { blank: true },
+        { cls:'t-green', text:'[PUB] instagram: uploaded · reach estimate: 8.2k' },
+        { cls:'t-green', text:'[PUB] tiktok: uploaded · using trending audio hook' },
+        { cls:'t-green', text:'[PUB] youtube shorts: uploaded · SEO title applied' },
+        { cls:'t-dim',   text:'[CAL] post logged · performance tracking active' },
+        { cls:'t-ai',    text:'[MEM] "cornetto" +340% vs baseline · weight updated' },
+        { cls:'t-dim',   text:'[CAL] monday queue: 3 more videos ready' },
+        { blank: true },
+        { cls:'t-purp',  prompt:'[SYS] ', after:'pipeline complete · 4m 12s · $0.00 API cost', cursor: true },
+      ],
+      [
+        { cls:'t-dim',   text:'# weekly planning · calendar agent running' },
+        { blank: true },
+        { cls:'t-purp',  text:'[CAL] analyzing week performance...' },
+        { cls:'t-ai',    text:'[CAL] food content: avg 3.4k reach · trending up' },
+        { cls:'t-ai',    text:'[CAL] monday: r/ItalianFood topic queued' },
+        { cls:'t-ai',    text:'[CAL] tuesday: r/Cooking viral thread queued' },
+        { cls:'t-ai',    text:'[CAL] wednesday: r/italy trending topic queued' },
+        { cls:'t-dim',   text:'[CAL] 3 scripts written · 3 videos pre-rendered' },
+        { blank: true },
+        { cls:'t-purp',  prompt:'[SYS] ', after:'week scheduled · all systems nominal', cursor: true },
+      ],
+    ];
+
+    let sceneIdx = 0, lineIdx = 0;
+    function clearTerminal() { twBody.innerHTML = ''; }
+    function buildStaticLine(line) {
+      if (line.blank) {
+        const d = document.createElement('div');
+        d.className = 't-line'; d.style.height = '.7rem';
+        twBody.appendChild(d); return;
+      }
+      const d = document.createElement('div');
+      d.className = 't-line ' + (line.cls || '');
+      d.textContent = line.text;
+      twBody.appendChild(d);
+    }
+    function buildTypedLine(line, cb) {
+      const d = document.createElement('div');
+      d.className = 't-line';
+      const prompt = document.createElement('span');
+      prompt.className = line.cls || '';
+      prompt.textContent = line.prompt;
+      d.appendChild(prompt);
+      const target = document.createElement('span');
+      target.className = 't-dim';
+      d.appendChild(target);
+      if (line.cursor) { const cur = document.createElement('span'); cur.className = 'cursor'; d.appendChild(cur); }
+      twBody.appendChild(d);
+      let ci = 0;
+      function type() {
+        if (ci < line.after.length) { target.textContent += line.after[ci++]; setTimeout(type, 38 + Math.random() * 28); }
+        else { cb(); }
+      }
+      setTimeout(type, 200);
+    }
+    function runScene() {
+      const scene = scenes[sceneIdx];
+      if (lineIdx >= scene.length) {
+        setTimeout(() => { sceneIdx = (sceneIdx + 1) % scenes.length; lineIdx = 0; clearTerminal(); runScene(); }, 3400);
+        return;
+      }
+      const line = scene[lineIdx++];
+      if (line.after) { buildTypedLine(line, () => setTimeout(runScene, line.cursor ? 0 : 160)); }
+      else { buildStaticLine(line); setTimeout(runScene, line.blank ? 30 : 130); }
+    }
+    runScene();
+  }
+</script>
+
+</body>
+</html>
