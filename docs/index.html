@@ -75,16 +75,6 @@
     .btn-ghost { display: inline-flex; align-items: center; gap: .5rem; font-family: 'Satoshi',sans-serif; font-size: .95rem; font-weight: 600; padding: .75rem 1.5rem; border-radius: 8px; background: transparent; color: var(--sub); border: 1px solid rgba(255,255,255,.1); cursor: pointer; text-decoration: none; transition: border-color .2s, color .2s; }
     .btn-ghost:hover { border-color: rgba(255,255,255,.25); color: var(--text); }
     .hero-visual { position: relative; z-index: 2; will-change: transform; }
-    .logo-wrap { display: flex; justify-content: center; align-items: center; position: relative; margin-bottom: 2rem; }
-    .logo-glow { position: absolute; width: 280px; height: 120px; background: radial-gradient(ellipse, rgba(134,59,255,.25) 0%, transparent 70%); animation: breathe 5s ease-in-out infinite; }
-    @keyframes breathe { 0%,100%{transform:scale(1);opacity:.6} 50%{transform:scale(1.1);opacity:1} }
-    .logo-img { width: 100%; max-width: 380px; position: relative; z-index: 1; filter: drop-shadow(0 0 20px rgba(134,59,255,.35)); will-change: transform; border-radius: 10px; }
-    .terminal { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; font-family: var(--mono); font-size: .8rem; box-shadow: 0 24px 48px rgba(0,0,0,.5), inset 0 1px 0 rgba(255,255,255,.04); }
-    .terminal-bar { display: flex; align-items: center; gap: .5rem; padding: .7rem 1rem; background: rgba(255,255,255,.025); border-bottom: 1px solid var(--border); }
-    .dot { width: 10px; height: 10px; border-radius: 50%; }
-    .dot-r{background:#ff5f57;} .dot-y{background:#febc2e;} .dot-g{background:#28c840;}
-    .terminal-title { font-family: 'Satoshi',sans-serif; font-size:.72rem; color: var(--dim); margin-left: auto; letter-spacing:.04em; }
-    .terminal-body { padding: 1.25rem 1.5rem; line-height: 1.85; height: 16rem; overflow: hidden; }
     .t-purp  { color: var(--purple); }
     .t-ai    { color: #c8b8e8; }
     .t-dim   { color: var(--dim); }
@@ -92,6 +82,39 @@
     .t-line  { margin-bottom: .1rem; }
     .cursor { display: inline-block; width: 7px; height: 1em; background: var(--purple); vertical-align: text-bottom; animation: blink 1.1s step-end infinite; margin-left: 1px; }
     @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+    /* ── DASHBOARD VISUAL ── */
+    .dash-card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; box-shadow: 0 24px 48px rgba(0,0,0,.5), inset 0 1px 0 rgba(255,255,255,.04); }
+    .dash-topbar { display: flex; align-items: center; justify-content: space-between; padding: .75rem 1.1rem; background: rgba(255,255,255,.025); border-bottom: 1px solid var(--border); }
+    .dash-title { font-family: var(--mono); font-size: .68rem; color: var(--dim); letter-spacing: .04em; }
+    .dash-live { display: flex; align-items: center; gap: .4rem; font-family: var(--mono); font-size: .58rem; letter-spacing: .1em; color: #28c840; }
+    .dash-live-dot { width: 6px; height: 6px; border-radius: 50%; background: #28c840; animation: blink-live 1.6s ease-in-out infinite; }
+    .cron-strip { display: flex; align-items: center; gap: .75rem; padding: .75rem 1.1rem; border-bottom: 1px solid var(--border); }
+    .cron-label { font-family: var(--mono); font-size: .58rem; letter-spacing: .1em; text-transform: uppercase; color: var(--dim); flex-shrink: 0; }
+    .cron-time { font-family: var(--mono); font-size: .82rem; font-weight: 700; color: var(--purple); flex-shrink: 0; }
+    .cron-progress-bar { flex: 1; height: 3px; background: rgba(255,255,255,.06); border-radius: 2px; overflow: hidden; }
+    .cron-fill { height: 100%; width: 62%; background: var(--purple); border-radius: 2px; animation: cron-pulse 3s ease-in-out infinite; }
+    @keyframes cron-pulse { 0%,100%{opacity:.7} 50%{opacity:1} }
+    .platform-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 0; border-bottom: 1px solid var(--border); }
+    .plat-card { padding: 1rem .9rem; border-right: 1px solid var(--border); }
+    .plat-card:last-child { border-right: none; }
+    .plat-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: .55rem; }
+    .plat-icon { font-family: var(--mono); font-size: .8rem; font-weight: 700; color: var(--text); }
+    .plat-badge { font-family: var(--mono); font-size: .5rem; letter-spacing: .08em; padding: .15rem .4rem; border-radius: 3px; }
+    .posted-badge { background: rgba(40,200,64,.12); color: #28c840; border: 1px solid rgba(40,200,64,.25); }
+    .sched-badge { background: rgba(254,188,46,.1); color: #febc2e; border: 1px solid rgba(254,188,46,.22); }
+    .proc-badge { background: rgba(134,59,255,.12); color: var(--purple); border: 1px solid rgba(134,59,255,.25); animation: blink-live 1.8s ease-in-out infinite; }
+    .plat-time { font-family: var(--mono); font-size: .6rem; color: var(--dim); margin-bottom: .25rem; }
+    .plat-metric { font-size: .72rem; color: var(--sub); }
+    .agent-strip { padding: .85rem 1.1rem; display: flex; flex-direction: column; gap: .55rem; }
+    .agent-row { display: flex; align-items: center; gap: .7rem; }
+    .ag-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+    .ag-dot.active { background: var(--purple); animation: blink-live 1.4s ease-in-out infinite; }
+    .ag-dot.idle { background: var(--dim); }
+    .ag-dot.done { background: #28c840; }
+    .ag-name { font-family: var(--mono); font-size: .68rem; color: var(--text); flex: 1; }
+    .ag-status { font-family: var(--mono); font-size: .62rem; color: var(--dim); }
+    .agent-row:has(.ag-dot.active) .ag-status { color: var(--purple); }
+    .agent-row:has(.ag-dot.done) .ag-status { color: #28c840; }
     section { padding: 7rem 3rem; }
     .section-label { font-family: var(--mono); font-size: .6rem; font-weight: 400; letter-spacing: .12em; text-transform: uppercase; color: var(--dim); margin-bottom: .85rem; }
     h2 { font-size: clamp(2rem, 4vw, 3.2rem); font-weight: 900; letter-spacing: -.04em; line-height: 1.05; margin-bottom: 1.25rem; }
@@ -306,16 +329,47 @@
   </div>
 
   <div class="hero-visual enter-3" id="hero-visual">
-    <div class="logo-wrap">
-      <div class="logo-glow"></div>
-      <img class="logo-img" src="logo.png" alt="WhyPost" id="hero-logo" />
-    </div>
-    <div class="terminal">
-      <div class="terminal-bar">
-        <div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div>
-        <span class="terminal-title">WhyPost &middot; pipeline &middot; 09:00:00</span>
+    <div class="dash-card">
+      <div class="dash-topbar">
+        <span class="dash-title">WhyPost · Mission Control</span>
+        <div class="dash-live"><span class="dash-live-dot"></span>LIVE</div>
       </div>
-      <div class="terminal-body" id="tw-body"></div>
+      <div class="cron-strip" id="cron-strip">
+        <span class="cron-label">NEXT RUN</span>
+        <span class="cron-time" id="cron-countdown">02:47:18</span>
+        <div class="cron-progress-bar"><div class="cron-fill" id="cron-fill"></div></div>
+      </div>
+      <div class="platform-grid">
+        <div class="plat-card posted" id="pc-ig">
+          <div class="plat-header">
+            <span class="plat-icon">IG</span>
+            <span class="plat-badge posted-badge">POSTED</span>
+          </div>
+          <div class="plat-time">3h ago · Reel</div>
+          <div class="plat-metric">847 views</div>
+        </div>
+        <div class="plat-card scheduled" id="pc-tk">
+          <div class="plat-header">
+            <span class="plat-icon">TK</span>
+            <span class="plat-badge sched-badge">09:00</span>
+          </div>
+          <div class="plat-time">Tomorrow · Short</div>
+          <div class="plat-metric">AI-generated ✓</div>
+        </div>
+        <div class="plat-card processing" id="pc-yt">
+          <div class="plat-header">
+            <span class="plat-icon">YT</span>
+            <span class="plat-badge proc-badge">WRITING</span>
+          </div>
+          <div class="plat-time">Script agent</div>
+          <div class="plat-metric" id="yt-dots">analyzing…</div>
+        </div>
+      </div>
+      <div class="agent-strip">
+        <div class="agent-row" id="ag-1"><span class="ag-dot active"></span><span class="ag-name">ScriptAgent</span><span class="ag-status">running</span></div>
+        <div class="agent-row" id="ag-2"><span class="ag-dot idle"></span><span class="ag-name">VideoAgent</span><span class="ag-status">idle</span></div>
+        <div class="agent-row" id="ag-3"><span class="ag-dot done"></span><span class="ag-name">PostAgent</span><span class="ag-status">done · IG ✓</span></div>
+      </div>
     </div>
   </div>
 
@@ -621,14 +675,12 @@
 <script>
   const heroText   = document.getElementById('hero-text');
   const heroVisual = document.getElementById('hero-visual');
-  const heroLogo   = document.getElementById('hero-logo');
   if (window.innerWidth > 768) {
     document.addEventListener('mousemove', e => {
       const x = (e.clientX / window.innerWidth  - 0.5) * 18;
       const y = (e.clientY / window.innerHeight - 0.5) * 10;
       if (heroText)   heroText.style.transform   = 'translate('+(-x*0.3)+'px,'+(-y*0.3)+'px)';
       if (heroVisual) heroVisual.style.transform = 'translate('+(x*0.25)+'px,'+(y*0.25)+'px)';
-      if (heroLogo)   heroLogo.style.transform   = 'translate('+(x*0.15)+'px,'+(y*0.15)+'px)';
     });
   }
 
@@ -643,6 +695,20 @@
     entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('stagger-go'); staggerIo.unobserve(e.target); } });
   }, { threshold: 0.08 });
   staggerTargets.forEach(sel => { const el = document.querySelector(sel); if (el) staggerIo.observe(el); });
+
+  /* cron countdown */
+  (function(){
+    const el = document.getElementById('cron-countdown');
+    if(!el) return;
+    let secs = 10038;
+    setInterval(function(){
+      secs = Math.max(0, secs - 1);
+      const h = String(Math.floor(secs/3600)).padStart(2,'0');
+      const m = String(Math.floor((secs%3600)/60)).padStart(2,'0');
+      const s = String(secs%60).padStart(2,'0');
+      el.textContent = h+':'+m+':'+s;
+    }, 1000);
+  })();
 
   const twBody = document.getElementById('tw-body');
   if (twBody) {
